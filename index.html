@@ -1,0 +1,4420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lombardia Verde Idrogeno — Asset Lifecycle Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.12.7/Recharts.min.js"></script>
+<script>
+  // Surface runtime errors so a blank page never happens silently.
+  window.addEventListener('error', function (e) {
+    var root = document.getElementById('root');
+    if (!root) return;
+    var msg = (e && e.error && e.error.stack) ? e.error.stack : (e && e.message ? e.message : String(e));
+    root.innerHTML = '<div style="padding:24px;font-family:JetBrains Mono,monospace;color:#E8654A;font-size:12px;line-height:1.6;white-space:pre-wrap;background:#0F1923;border-left:3px solid #E8654A;margin:24px;border-radius:4px;">RUNTIME ERROR\n\n' + msg.replace(/</g,'&lt;') + '</div>';
+  });
+</script>
+<style>
+  :root {
+    /* DARK mode is default — IFS/AVEVA charcoal-navy palette */
+    --bg-0: #0A1018;
+    --bg-1: #0F1923;
+    --bg-2: #15212E;
+    --bg-3: #1C2B3B;
+    --line: #243446;
+    --line-2: #2E4257;
+    --ink: #E7ECF2;
+    --ink-2: #B7C2CF;
+    --ink-3: #7E8C9C;
+    --ink-4: #4A5867;
+    --amber: #D9A741;
+    --amber-2: #F0B94E;
+    --coral: #E8654A;
+    --cyan: #4FBCE6;
+    --emerald: #5FCB8C;
+    --violet: #9985E8;
+    --red: #E25C5C;
+    --grad-aveva: linear-gradient(135deg, #1A6E8E 0%, #4FBCE6 100%);
+    --grad-resolve: linear-gradient(135deg, #8A6020 0%, #D9A741 100%);
+    --grad-ifs: linear-gradient(135deg, #B14628 0%, #E8654A 100%);
+    --grad-copperleaf: linear-gradient(135deg, #2E7A52 0%, #5FCB8C 100%);
+    /* Heat tile alphas — dark default */
+    --heat-red-a:    0.25; --heat-red-b:    0.45; --heat-red-bd:    0.6;
+    --heat-orange-a: 0.18; --heat-orange-b: 0.32; --heat-orange-bd: 0.45;
+    --heat-amber-a:  0.15; --heat-amber-b:  0.28; --heat-amber-bd:  0.4;
+    --heat-yellow-a: 0.10; --heat-yellow-b: 0.20; --heat-yellow-bd: 0.3;
+    --heat-green-a:  0.10; --heat-green-b:  0.20; --heat-green-bd:  0.3;
+    --heat-emer-a:   0.15; --heat-emer-b:   0.28; --heat-emer-bd:   0.4;
+    /* Grid lines */
+    --grid-line: rgba(255,255,255,0.018);
+    --head-grad-color: 255,255,255;
+    --head-grad-alpha: 0.02;
+    /* Backdrop & shadows */
+    --drawer-overlay: rgba(5, 9, 14, 0.6);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.4);
+    --topbar-bg: rgba(10, 16, 24, 0.85);
+    --font-sans: 'Manrope';
+  }
+
+  .light {
+    /* LIGHT mode — NxB / Predict aesthetic */
+    --bg-0: #fbfbfb;
+    --bg-1: #ffffff;
+    --bg-2: #f6f7f9;
+    --bg-3: #eef0f3;
+    --line: rgba(57, 56, 86, 0.10);
+    --line-2: rgba(57, 56, 86, 0.18);
+    --ink: #393856;
+    --ink-2: #49586F;
+    --ink-3: #6B7A8F;
+    --ink-4: #94a3b8;
+    --amber: #c08820;
+    --amber-2: #d49a2c;
+    --coral: #d04a2e;
+    --cyan: #1a8cba;
+    --emerald: #2e9460;
+    --violet: #7c3aed;
+    --red: #c92e2e;
+    --grad-aveva: linear-gradient(135deg, #1a8cba 0%, #4FBCE6 100%);
+    --grad-resolve: linear-gradient(135deg, #c08820 0%, #e5b34a 100%);
+    --grad-ifs: linear-gradient(135deg, #d04a2e 0%, #e8794f 100%);
+    --grad-copperleaf: linear-gradient(135deg, #2e9460 0%, #5fc88a 100%);
+    /* Heat tiles tuned for white bg — stronger alphas to read */
+    --heat-red-a:    0.08; --heat-red-b:    0.18; --heat-red-bd:    0.35;
+    --heat-orange-a: 0.06; --heat-orange-b: 0.14; --heat-orange-bd: 0.30;
+    --heat-amber-a:  0.06; --heat-amber-b:  0.14; --heat-amber-bd:  0.28;
+    --heat-yellow-a: 0.05; --heat-yellow-b: 0.12; --heat-yellow-bd: 0.22;
+    --heat-green-a:  0.06; --heat-green-b:  0.14; --heat-green-bd:  0.25;
+    --heat-emer-a:   0.07; --heat-emer-b:   0.16; --heat-emer-bd:   0.32;
+    --grid-line: rgba(0,0,0,0.025);
+    --head-grad-color: 0,0,0;
+    --head-grad-alpha: 0.018;
+    --drawer-overlay: rgba(57, 56, 86, 0.25);
+    --shadow-hover: 0 4px 16px rgba(57, 56, 86, 0.10), 0 2px 4px rgba(57, 56, 86, 0.04);
+    --topbar-bg: rgba(251, 251, 251, 0.88);
+    --font-sans: 'Inter';
+  }
+
+  html, body { background: var(--bg-0); color: var(--ink); }
+  body { font-family: var(--font-sans), system-ui, sans-serif; font-feature-settings: "ss01", "cv11"; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; font-feature-settings: "zero", "ss02"; }
+  .font-serif { font-family: 'Source Serif 4', Georgia, serif; }
+  .num { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+  /* NxB-style mono label */
+  .label-mono { font-family: 'JetBrains Mono', monospace; letter-spacing: 0.05px; font-feature-settings: "zero"; }
+  /* Subtle background grid */
+  .bg-grid {
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .panel { background: var(--bg-1); border: 1px solid var(--line); }
+  .panel-2 { background: var(--bg-2); border: 1px solid var(--line); }
+  .divider { border-color: var(--line); }
+  .ink-2 { color: var(--ink-2); }
+  .ink-3 { color: var(--ink-3); }
+  .ink-4 { color: var(--ink-4); }
+  /* Chips */
+  .chip { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; }
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-0); }
+  ::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--ink-4); }
+  /* Pulse for live indicator */
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+  }
+  .pulse-dot { animation: pulse-dot 1.8s ease-in-out infinite; }
+  /* Section nav active underline */
+  .nav-active::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: -1px;
+    height: 2px;
+    background: currentColor;
+  }
+  /* Module tile hover */
+  .mod-tile { transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease; }
+  .mod-tile:hover { transform: translateY(-2px); border-color: var(--line-2); box-shadow: var(--shadow-hover); }
+  /* Evidence step entry */
+  .step-num { font-family: 'Source Serif 4', serif; font-style: italic; font-weight: 400; }
+  /* Diagonal stripe for deferred/conditional */
+  .stripe-warn {
+    background-image: repeating-linear-gradient(135deg, transparent 0, transparent 6px, rgba(217, 167, 65, 0.08) 6px, rgba(217, 167, 65, 0.08) 12px);
+  }
+  /* Lane color blocks — driven by CSS vars */
+  .lane-1 { color: var(--red); }
+  .lane-2 { color: var(--amber); }
+  .lane-3 { color: var(--violet); }
+  .bg-lane-1 { background: rgba(226, 92, 92, 0.08); border-color: rgba(226, 92, 92, 0.25); }
+  .bg-lane-2 { background: rgba(217, 167, 65, 0.08); border-color: rgba(217, 167, 65, 0.25); }
+  .bg-lane-3 { background: rgba(153, 133, 232, 0.08); border-color: rgba(153, 133, 232, 0.25); }
+  .light .bg-lane-1 { background: rgba(201, 46, 46, 0.05); border-color: rgba(201, 46, 46, 0.22); }
+  .light .bg-lane-2 { background: rgba(192, 136, 32, 0.05); border-color: rgba(192, 136, 32, 0.22); }
+  .light .bg-lane-3 { background: rgba(124, 58, 237, 0.05); border-color: rgba(124, 58, 237, 0.22); }
+  /* Tier color blocks */
+  .tier-1-bg { background: rgba(226, 92, 92, 0.12); border-color: rgba(226, 92, 92, 0.35); }
+  .tier-2-bg { background: rgba(217, 167, 65, 0.10); border-color: rgba(217, 167, 65, 0.30); }
+  .tier-3-bg { background: rgba(95, 203, 140, 0.08); border-color: rgba(95, 203, 140, 0.25); }
+  .tier-m17-bg { background: rgba(79, 188, 230, 0.08); border-color: rgba(79, 188, 230, 0.30); }
+  /* Subtle inner shadow on panels */
+  .inset-glow { box-shadow: inset 0 1px 0 rgba(255,255,255,0.03); }
+  .light .inset-glow { box-shadow: 0 1px 2px rgba(57, 56, 86, 0.04); }
+  /* Drawer */
+  .drawer-overlay { background: var(--drawer-overlay); backdrop-filter: blur(2px); }
+  /* Smooth tab transition */
+  .tab-fade { animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  /* Slim divider */
+  .div-vert { background: linear-gradient(180deg, transparent 0%, var(--line) 20%, var(--line) 80%, transparent 100%); }
+  /* Heat tile colors — alpha values driven by --heat-* vars */
+  .heat-red    { background: linear-gradient(135deg, rgba(226, 92, 92, var(--heat-red-a)), rgba(226, 92, 92, var(--heat-red-b))); border-color: rgba(226, 92, 92, var(--heat-red-bd)); }
+  .heat-orange { background: linear-gradient(135deg, rgba(232,101,74, var(--heat-orange-a)), rgba(232,101,74, var(--heat-orange-b))); border-color: rgba(232,101,74, var(--heat-orange-bd)); }
+  .heat-amber  { background: linear-gradient(135deg, rgba(217,167,65, var(--heat-amber-a)), rgba(217,167,65, var(--heat-amber-b))); border-color: rgba(217,167,65, var(--heat-amber-bd)); }
+  .heat-yellow { background: linear-gradient(135deg, rgba(240,201,113, var(--heat-yellow-a)), rgba(240,201,113, var(--heat-yellow-b))); border-color: rgba(240,201,113, var(--heat-yellow-bd)); }
+  .heat-green  { background: linear-gradient(135deg, rgba(95,203,140, var(--heat-green-a)), rgba(95,203,140, var(--heat-green-b))); border-color: rgba(95,203,140, var(--heat-green-bd)); }
+  .heat-emer   { background: linear-gradient(135deg, rgba(95,203,140, var(--heat-emer-a)), rgba(95,203,140, var(--heat-emer-b))); border-color: rgba(95,203,140, var(--heat-emer-bd)); }
+  /* M17 distinct marker */
+  .m17-ring { box-shadow: 0 0 0 1.5px rgba(79, 188, 230, 0.6), 0 0 0 4px rgba(79, 188, 230, 0.15); }
+  .light .m17-ring { box-shadow: 0 0 0 1.5px rgba(26, 140, 186, 0.8), 0 0 0 4px rgba(26, 140, 186, 0.20); }
+  /* Subtle gradient for headers — driven by vars */
+  .head-grad { background: linear-gradient(180deg, rgba(var(--head-grad-color), var(--head-grad-alpha)) 0%, transparent 100%); }
+  /* Glow chip for live data */
+  .live-chip { background: rgba(95, 203, 140, 0.1); color: var(--emerald); border: 1px solid rgba(95, 203, 140, 0.3); }
+  /* Routing arrow */
+  .route-arrow { color: var(--ink-3); }
+  /* Tighter table */
+  .tbl-tight th, .tbl-tight td { padding: 8px 12px; }
+  /* Story badge */
+  .story-badge { background: linear-gradient(180deg, var(--bg-2), var(--bg-1)); border: 1px solid var(--line); }
+  /* Top bar — uses var for blur background so it adapts */
+  .topbar-bg { background: var(--topbar-bg); }
+
+  /* ===== LIGHT MODE TAILWIND OVERRIDES ===== */
+  /* Text accents: darker tones for legibility on white */
+  .light .text-red-400,    .light .text-red-300    { color: #c92e2e !important; }
+  .light .text-amber-300,  .light .text-amber-400  { color: #a87519 !important; }
+  .light .text-orange-300, .light .text-orange-400 { color: #b8431f !important; }
+  .light .text-cyan-300,   .light .text-cyan-400   { color: #137094 !important; }
+  .light .text-emerald-400 { color: #1f7a4d !important; }
+  .light .text-violet-300, .light .text-violet-400 { color: #7c3aed !important; }
+  /* Pill backgrounds — slightly more saturated since on white */
+  .light .bg-red-500\/10     { background-color: rgba(201, 46, 46, 0.07) !important; }
+  .light .bg-amber-500\/10   { background-color: rgba(192, 136, 32, 0.08) !important; }
+  .light .bg-orange-500\/10  { background-color: rgba(208, 74, 46, 0.07) !important; }
+  .light .bg-cyan-500\/10    { background-color: rgba(26, 140, 186, 0.07) !important; }
+  .light .bg-emerald-500\/10 { background-color: rgba(46, 148, 96, 0.07) !important; }
+  .light .bg-violet-500\/10  { background-color: rgba(124, 58, 237, 0.07) !important; }
+  .light .border-red-500\/30,    .light .border-red-500\/40    { border-color: rgba(201, 46, 46, 0.30) !important; }
+  .light .border-amber-500\/30,  .light .border-amber-500\/40  { border-color: rgba(192, 136, 32, 0.32) !important; }
+  .light .border-orange-500\/30, .light .border-orange-500\/40 { border-color: rgba(208, 74, 46, 0.30) !important; }
+  .light .border-cyan-500\/30,   .light .border-cyan-500\/40   { border-color: rgba(26, 140, 186, 0.30) !important; }
+  .light .border-emerald-500\/30,.light .border-emerald-500\/40{ border-color: rgba(46, 148, 96, 0.30) !important; }
+  .light .border-violet-500\/30, .light .border-violet-500\/40 { border-color: rgba(124, 58, 237, 0.30) !important; }
+  /* Border-left accents (used on panels) */
+  .light .border-l-red-500     { border-left-color: #c92e2e !important; }
+  .light .border-l-amber-500   { border-left-color: #c08820 !important; }
+  .light .border-l-orange-500  { border-left-color: #d04a2e !important; }
+  .light .border-l-cyan-500    { border-left-color: #1a8cba !important; }
+  .light .border-l-emerald-500 { border-left-color: #2e9460 !important; }
+  .light .border-l-violet-500  { border-left-color: #7c3aed !important; }
+  /* White-alpha utility backgrounds → swap to dark-alpha for contrast on white */
+  .light .bg-white\/\[0\.02\],
+  .light .bg-white\/\[0\.03\],
+  .light .bg-white\/5  { background-color: rgba(57, 56, 86, 0.025) !important; }
+  .light .border-white\/\[0\.04\],
+  .light .border-white\/10 { border-color: rgba(57, 56, 86, 0.08) !important; }
+  .light .hover\:bg-white\/\[0\.02\]:hover,
+  .light .hover\:bg-white\/\[0\.03\]:hover { background-color: rgba(57, 56, 86, 0.035) !important; }
+  /* The pulse-dot bg on alert chips */
+  .light .bg-red-400    { background-color: #c92e2e !important; }
+  .light .bg-amber-300, .light .bg-amber-400  { background-color: #c08820 !important; }
+  .light .bg-emerald-400 { background-color: #2e9460 !important; }
+  /* Drawer panel surface in light mode */
+  .light .drawer-overlay { backdrop-filter: blur(3px); }
+  /* Background images on transition cards — gradients are baked-in dark, override via class */
+  .light .transition-cta-aveva   { background: linear-gradient(135deg, rgba(192,136,32,0.06) 0%, var(--bg-1) 60%) !important; }
+  .light .transition-cta-resolve { background: linear-gradient(135deg, rgba(208,74,46,0.05) 0%, var(--bg-1) 60%) !important; }
+  .light .transition-cta-ifs     { background: linear-gradient(135deg, rgba(46,148,96,0.05) 0%, var(--bg-1) 60%) !important; }
+  /* Subtle elevation shadow on panels in light mode */
+  .light .panel,
+  .light .panel-2 { box-shadow: 0 1px 2px rgba(57, 56, 86, 0.04); }
+
+  /* Theme toggle button */
+  .theme-toggle {
+    width: 32px; height: 32px;
+    display: inline-grid; place-items: center;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--bg-1);
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .theme-toggle:hover { color: var(--ink); border-color: var(--line-2); background: var(--bg-2); }
+</style>
+</head>
+<body class="bg-grid">
+<div id="root"></div>
+<script>
+"use strict";
+
+const {
+  useState,
+  useMemo,
+  useEffect,
+  Fragment
+} = React;
+const {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  ScatterChart,
+  Scatter,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+  ReferenceArea,
+  Cell,
+  Legend,
+  ComposedChart
+} = Recharts;
+const MODULES = [{
+  id: 1,
+  pos: 1,
+  tier: 1,
+  health: 38,
+  voltage: 2870,
+  rate: 10.0,
+  resist: 38,
+  eff: 81,
+  tempDelta: 10,
+  hours: 44500
+}, {
+  id: 2,
+  pos: 2,
+  tier: 1,
+  health: 40,
+  voltage: 2840,
+  rate: 9.0,
+  resist: 35,
+  eff: 82,
+  tempDelta: 9,
+  hours: 41000
+}, {
+  id: 3,
+  pos: 3,
+  tier: 1,
+  health: 30,
+  voltage: 2930,
+  rate: 12.0,
+  resist: 45,
+  eff: 78,
+  tempDelta: 12,
+  hours: 42000
+}, {
+  id: 4,
+  pos: 4,
+  tier: 1,
+  health: 42,
+  voltage: 2810,
+  rate: 8.0,
+  resist: 30,
+  eff: 83,
+  tempDelta: 8,
+  hours: 43200
+}, {
+  id: 5,
+  pos: 5,
+  tier: 2,
+  health: 65,
+  voltage: 2200,
+  rate: 3.0,
+  resist: 15,
+  eff: 92,
+  tempDelta: 3,
+  hours: 38000
+}, {
+  id: 6,
+  pos: 6,
+  tier: 2,
+  health: 62,
+  voltage: 2240,
+  rate: 3.5,
+  resist: 17,
+  eff: 91,
+  tempDelta: 4,
+  hours: 38900
+}, {
+  id: 7,
+  pos: 7,
+  tier: 2,
+  health: 58,
+  voltage: 2310,
+  rate: 4.0,
+  resist: 20,
+  eff: 90,
+  tempDelta: 5,
+  hours: 39200
+}, {
+  id: 8,
+  pos: 8,
+  tier: 2,
+  health: 55,
+  voltage: 2390,
+  rate: 4.5,
+  resist: 22,
+  eff: 88,
+  tempDelta: 5,
+  hours: 39800
+}, {
+  id: 9,
+  pos: 9,
+  tier: 2,
+  health: 53,
+  voltage: 2450,
+  rate: 5.5,
+  resist: 25,
+  eff: 87,
+  tempDelta: 6,
+  hours: 40100
+}, {
+  id: 10,
+  pos: 10,
+  tier: 2,
+  health: 50,
+  voltage: 2500,
+  rate: 6.0,
+  resist: 28,
+  eff: 85,
+  tempDelta: 7,
+  hours: 39500
+}, {
+  id: 11,
+  pos: 11,
+  tier: 2,
+  health: 52,
+  voltage: 2470,
+  rate: 5.0,
+  resist: 24,
+  eff: 86,
+  tempDelta: 6,
+  hours: 40400
+}, {
+  id: 12,
+  pos: 12,
+  tier: 3,
+  health: 72,
+  voltage: 2080,
+  rate: 2.5,
+  resist: 10,
+  eff: 94,
+  tempDelta: 3,
+  hours: 37200
+}, {
+  id: 13,
+  pos: 13,
+  tier: 3,
+  health: 73,
+  voltage: 2070,
+  rate: 2.0,
+  resist: 9,
+  eff: 94,
+  tempDelta: 2,
+  hours: 36800
+}, {
+  id: 14,
+  pos: 14,
+  tier: 3,
+  health: 74,
+  voltage: 2060,
+  rate: 2.0,
+  resist: 8,
+  eff: 94,
+  tempDelta: 2,
+  hours: 36500
+}, {
+  id: 15,
+  pos: 15,
+  tier: 3,
+  health: 75,
+  voltage: 2050,
+  rate: 1.5,
+  resist: 8,
+  eff: 95,
+  tempDelta: 2,
+  hours: 36000
+}, {
+  id: 16,
+  pos: 16,
+  tier: 3,
+  health: 76,
+  voltage: 2040,
+  rate: 1.5,
+  resist: 7,
+  eff: 95,
+  tempDelta: 2,
+  hours: 35800
+}, {
+  id: 17,
+  pos: 17,
+  tier: 'M17',
+  health: 55,
+  voltage: 2400,
+  rate: 4.0,
+  resist: 22,
+  eff: 88,
+  tempDelta: 5,
+  hours: 54000,
+  dualMechanism: true
+}, {
+  id: 18,
+  pos: 18,
+  tier: 3,
+  health: 77,
+  voltage: 2020,
+  rate: 1.2,
+  resist: 6,
+  eff: 96,
+  tempDelta: 1,
+  hours: 35600
+}, {
+  id: 19,
+  pos: 19,
+  tier: 3,
+  health: 77,
+  voltage: 2010,
+  rate: 1.0,
+  resist: 6,
+  eff: 96,
+  tempDelta: 1,
+  hours: 35400
+}, {
+  id: 20,
+  pos: 20,
+  tier: 3,
+  health: 78,
+  voltage: 2000,
+  rate: 1.0,
+  resist: 5,
+  eff: 96,
+  tempDelta: 1,
+  hours: 35500
+}];
+const PoF = {
+  1: {
+    d30: 18,
+    d90: 75,
+    d365: 92,
+    conf: 92,
+    cof: 'Major',
+    recommendation: 'REPLACE'
+  },
+  2: {
+    d30: 15,
+    d90: 70,
+    d365: 90,
+    conf: 91,
+    cof: 'Major',
+    recommendation: 'REPLACE'
+  },
+  3: {
+    d30: 25,
+    d90: 85,
+    d365: 95,
+    conf: 94,
+    cof: 'Major',
+    recommendation: 'REPLACE'
+  },
+  4: {
+    d30: 12,
+    d90: 70,
+    d365: 88,
+    conf: 90,
+    cof: 'Major',
+    recommendation: 'REPLACE'
+  },
+  5: {
+    d30: 2,
+    d90: 12,
+    d365: 28,
+    conf: 68,
+    cof: 'Moderate',
+    recommendation: 'MONITOR'
+  },
+  6: {
+    d30: 2,
+    d90: 14,
+    d365: 30,
+    conf: 68,
+    cof: 'Moderate',
+    recommendation: 'MONITOR'
+  },
+  7: {
+    d30: 3,
+    d90: 18,
+    d365: 35,
+    conf: 70,
+    cof: 'Moderate',
+    recommendation: 'MONITOR'
+  },
+  8: {
+    d30: 3,
+    d90: 22,
+    d365: 38,
+    conf: 71,
+    cof: 'Moderate',
+    recommendation: 'MONITOR'
+  },
+  9: {
+    d30: 4,
+    d90: 25,
+    d365: 42,
+    conf: 72,
+    cof: 'Moderate',
+    recommendation: 'MONITOR'
+  },
+  10: {
+    d30: 5,
+    d90: 30,
+    d365: 45,
+    conf: 74,
+    cof: 'Moderate',
+    recommendation: 'MONITOR'
+  },
+  11: {
+    d30: 4,
+    d90: 26,
+    d365: 40,
+    conf: 73,
+    cof: 'Moderate',
+    recommendation: 'MONITOR'
+  },
+  12: {
+    d30: 1,
+    d90: 4,
+    d365: 9,
+    conf: 85,
+    cof: 'Low',
+    recommendation: 'MONITOR'
+  },
+  13: {
+    d30: 1,
+    d90: 3,
+    d365: 8,
+    conf: 85,
+    cof: 'Low',
+    recommendation: 'MONITOR'
+  },
+  14: {
+    d30: 1,
+    d90: 3,
+    d365: 8,
+    conf: 85,
+    cof: 'Low',
+    recommendation: 'MONITOR'
+  },
+  15: {
+    d30: 1,
+    d90: 3,
+    d365: 7,
+    conf: 85,
+    cof: 'Low',
+    recommendation: 'MONITOR'
+  },
+  16: {
+    d30: 1,
+    d90: 3,
+    d365: 7,
+    conf: 85,
+    cof: 'Low',
+    recommendation: 'MONITOR'
+  },
+  17: {
+    d30: 8,
+    d90: 25,
+    d365: 45,
+    conf: 88,
+    cof: 'Moderate',
+    recommendation: 'REFURBISH',
+    special: 'Dual mechanism: aging (54k hrs) + contamination'
+  },
+  18: {
+    d30: 1,
+    d90: 2,
+    d365: 6,
+    conf: 86,
+    cof: 'Low',
+    recommendation: 'MONITOR'
+  },
+  19: {
+    d30: 1,
+    d90: 2,
+    d365: 6,
+    conf: 86,
+    cof: 'Low',
+    recommendation: 'MONITOR'
+  },
+  20: {
+    d30: 1,
+    d90: 2,
+    d365: 5,
+    conf: 86,
+    cof: 'Low',
+    recommendation: 'MONITOR'
+  }
+};
+const WATER_TIMELINE = (() => {
+  const data = [];
+  for (let d = -120; d <= 0; d++) {
+    let res, fe, dp;
+    if (d <= -70) {
+      res = 16 + Math.sin(d * 0.3) * 0.3 + (Math.random() - 0.5) * 0.4;
+      fe = 3 + Math.random() * 2;
+      dp = 0.3 + Math.max(0, (d + 120) / 50) * 0.1;
+    } else {
+      const t = (d + 70) / 70;
+      res = Math.max(0.3, 16 * Math.exp(-3.2 * t) + (Math.random() - 0.5) * 0.3);
+      fe = Math.min(95, 5 + 80 * (t * t) + Math.sin(d * 0.5) * 6 + (Math.random() - 0.5) * 8);
+      dp = Math.min(1.65, 0.4 + 1.2 * t + (Math.random() - 0.5) * 0.05);
+    }
+    data.push({
+      day: d,
+      resistivity: +res.toFixed(2),
+      iron: +Math.max(0, fe).toFixed(1),
+      dpA: +dp.toFixed(2),
+      dpB: +(dp - 0.06).toFixed(2),
+      fleetHealth: d <= -70 ? 85 + (Math.random() - 0.5) * 1.5 : Math.max(58, 85 - (d + 70) / 70 * 28 + (Math.random() - 0.5) * 1.2)
+    });
+  }
+  return data;
+})();
+const MOD3_VOLTAGE = (() => {
+  const data = [];
+  for (let d = -90; d <= 0; d++) {
+    const base = 1850;
+    const ramp = d <= -70 ? 0 : Math.pow((d + 70) / 70, 1.4) * 1080;
+    data.push({
+      day: d,
+      voltage: +(base + ramp + (Math.random() - 0.5) * 12).toFixed(0),
+      normal: 1850
+    });
+  }
+  return data;
+})();
+const EVIDENCE = [{
+  n: 1,
+  title: 'Fleet-Wide Degradation Pattern',
+  source: 'AVEVA CONNECT sensor data',
+  sourceColor: 'cyan',
+  summary: 'All 20 modules degrading; severity varies systematically with header position. Tier 1: 8–12 mV/day. Tier 2: 3–6 mV/day. Tier 3: 1–2.5 mV/day. Normal: <2 mV/day.',
+  detail: 'Health indices have dropped from baseline 85: Module 3 = 30, Module 1 = 38, Module 2 = 40, Module 4 = 42 (Tier 1); 50–65 (Tier 2); 68–78 (Tier 3). Module 17 sits at 55 — decline began pre-contamination due to aging at 54,000 hours, but contamination compounds the damage. This is coordinated, not random.',
+  iconClass: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'
+}, {
+  n: 2,
+  title: 'Positional Gradient on Water Header',
+  source: 'AVEVA CONNECT asset topology',
+  sourceColor: 'cyan',
+  summary: 'Degradation severity correlates with physical position on water distribution header. r = 0.94 for Tier 1. Modules closest to inlet are worst.',
+  detail: 'Positional gradient confirms a common upstream cause in feedwater supply — not individual module failures. Module 17 deviates from the gradient: its rise rate (4 mV/day) is higher than position 17 would predict, consistent with pre-existing aging damage increasing susceptibility.',
+  iconClass: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'
+}, {
+  n: 3,
+  title: 'Water Quality Contamination',
+  source: 'PI tags WAT.DI.Resistivity, WAT.DI.IronConc',
+  sourceColor: 'cyan',
+  summary: 'DI resistivity dropped from 16 MΩ·cm baseline to 0.4 MΩ·cm. Iron 85 ppb — 4.25× OEM limit of 20 ppb. IX vessel ΔP at alarm threshold.',
+  detail: 'Ion exchange vessel differential pressures elevated: V-201A at 1.6 bar, V-201B at 1.5 bar (alarm: 1.5, baseline: 0.3) — confirming resin exhaustion. Contamination onset 10 weeks ago aligns precisely with start of fleet-wide degradation.',
+  iconClass: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'
+}, {
+  n: 4,
+  title: 'Deferred Maintenance',
+  source: 'IFS Cloud EAM — WO-2025-04412',
+  sourceColor: 'orange',
+  summary: 'Deionization resin replacement WO created 9 months ago, scheduled 6 months ago, deferred 3 months due to resin supply chain delay. Deferral date = contamination onset date (within 5 days).',
+  detail: 'This is the critical evidence step. Without IFS Cloud maintenance data flowing through AVEVA CONNECT to Resolve Predict, the AI would see "modules degrading" and "water quality poor" but never link them to the deferred maintenance decision that caused the contamination. Replacement resin (Purolite NRW37, 2 pallets) arrived 3 days ago and is in the on-site warehouse.',
+  iconClass: 'bg-orange-500/10 text-orange-400 border-orange-500/30'
+}, {
+  n: 5,
+  title: 'OEM Failure Mechanism Confirmation',
+  source: 'OEM Technical Bulletin TB-2024-003',
+  sourceColor: 'amber',
+  summary: 'OEM states iron >20 ppb accelerates catalyst poisoning 4–8×. Observed acceleration 4–6×. All five OEM-predicted indicators consistent with observed data.',
+  detail: 'Iron threshold exceeded (4.25×). Acceleration factor consistent. Self-reinforcing mechanism confirmed by day-over-day rise rate increase. Reversibility threshold explains tier differentiation: Tier 1 at 30–45% membrane resistance increase (irreversible per OEM), Tier 2 at 15–28% (borderline), Tier 3 at 5–10% (reversible). Thermal sensitivity confirmed by elevated stack temperatures under solar cycling.',
+  iconClass: 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+}];
+const ACTIONS = [{
+  id: 'A1',
+  title: 'Emergency resin replacement V-201A/B',
+  asset: 'GH01-WAT-01-002, GH01-WAT-01-003',
+  lane: 1,
+  cost: 50000,
+  costLabel: '€50K',
+  confidence: 97,
+  pof: '—',
+  cof: 'Severe',
+  urgency: 'Execute immediately',
+  rationale: 'Iron breakthrough active at 85 ppb (4.25× OEM limit). Every hour adds incremental damage to 16 recoverable modules. Estimated delay cost: €15K–€25K/day.',
+  destination: 'IFS Cloud EAM',
+  laneDescription: 'Within maintenance authority. No capital approval needed.'
+}, {
+  id: 'A2',
+  title: 'Fleet-wide enhanced monitoring (post water fix)',
+  asset: 'GH01-ELZ-01-001 through 020',
+  lane: 1,
+  cost: 5000,
+  costLabel: '€5K',
+  confidence: 95,
+  pof: '—',
+  cof: 'N/A',
+  urgency: 'Concurrent with resin replacement',
+  rationale: 'Post-fix monitoring data raises Tier 2 confidence and determines recovery vs refurbishment. 10-second PI sampling for 30 days.',
+  destination: 'IFS Cloud EAM',
+  laneDescription: 'Operational change. PI System config update.'
+}, {
+  id: 'A3',
+  title: 'Tier 1 stack replacements (4 modules)',
+  asset: 'GH01-ELZ-01-001, 002, 003, 004',
+  lane: 2,
+  cost: 2800000,
+  costLabel: '€2.8M',
+  confidence: 92,
+  pof: '70–85% at 90d',
+  cof: 'Major',
+  urgency: 'Q3 outage window',
+  rationale: 'Contamination damage irreversible. Cell voltage rise rates 8–12 mV/day indicate self-reinforcing catalyst poisoning. Fixing water source will not reverse existing damage.',
+  destination: 'Copperleaf → IFS Cloud PPM',
+  laneDescription: 'Capital investment. Copperleaf optimizes timing/sequencing against budget and outage windows.'
+}, {
+  id: 'A4',
+  title: 'Module 17 refurbishment (MEA replacement)',
+  asset: 'GH01-ELZ-01-017',
+  lane: 2,
+  cost: 450000,
+  costLabel: '€450K',
+  confidence: 88,
+  pof: '45% at 180d',
+  cof: 'Moderate',
+  urgency: 'Bundle with Q3 outage',
+  rationale: 'Primary cause is aging at 54,000 hrs. Membrane not irreversibly destroyed. Refurbishment restores 20–30k hrs of service at 64% of full-replacement cost. Contamination compressed timeline ~6 months.',
+  destination: 'Copperleaf → IFS Cloud PPM',
+  laneDescription: 'Capital investment. Bundled with Tier 1 outage for crew efficiency.'
+}, {
+  id: 'A5',
+  title: 'Secondary iron filtration (V-202)',
+  asset: 'GH01-WAT-01-004 (new asset)',
+  lane: 2,
+  cost: 150000,
+  costLabel: '€150K',
+  confidence: 97,
+  pof: 'N/A',
+  cof: 'Severe',
+  urgency: 'Q2 maintenance window',
+  rationale: 'Structural fix to prevent recurrence. Redundant barrier downstream of V-201A/B. AVEVA Engineering designs P&ID, IFS Cloud PPM manages capital project.',
+  destination: 'Copperleaf → AVEVA Engineering → IFS PPM',
+  laneDescription: 'Capital improvement. €150K to prevent recurrence of €4.5M damage scenario.'
+}, {
+  id: 'A6',
+  title: 'Tier 2 conditional monitoring (7 modules)',
+  asset: 'GH01-ELZ-01-005 through 011',
+  lane: 3,
+  cost: 1350000,
+  costLabel: '€1.35M conditional',
+  confidence: 68,
+  pof: '25–45% at 12mo',
+  cof: 'Moderate',
+  urgency: 'Decision at Day 60 post water fix',
+  rationale: 'Outcome depends on data that does not exist yet. Acting now means committing €3.15M for refurbishments that may not be needed. 60–70% recovery probability for most modules.',
+  destination: 'Copperleaf (conditional)',
+  laneDescription: 'Lower confidence (68%). Copperleaf holds contingent budget. No work orders created until monitoring data raises confidence.'
+}];
+const SNAPSHOTS = [{
+  id: 0,
+  label: 'Snapshot 0',
+  date: 'October (prior year)',
+  title: 'Original Approved Plan',
+  description: 'Copperleaf optimized and approved with live condition data. All modules healthy (health 82–90). Water system functioning normally. Plan was correct at time of approval.',
+  total: 1820000,
+  items: [{
+    name: 'Module 17 refurbishment',
+    q: 'Q4',
+    cost: 450000,
+    status: 'approved',
+    confidence: 82,
+    note: 'Aging at 54k hrs — planned interval'
+  }, {
+    name: 'Module 12 refurbishment',
+    q: 'Y2 Q2',
+    cost: 450000,
+    status: 'approved',
+    confidence: 80,
+    note: 'Aging-based projection'
+  }, {
+    name: 'Transformer T-401 overhaul',
+    q: 'Q2',
+    cost: 380000,
+    status: 'approved',
+    confidence: 85,
+    note: 'OEM interval'
+  }, {
+    name: 'Cooling system tower refurb',
+    q: 'Q4',
+    cost: 240000,
+    status: 'approved',
+    confidence: 88,
+    note: '15-year service'
+  }, {
+    name: 'Rectifier PM bundle',
+    q: 'Q3',
+    cost: 180000,
+    status: 'approved',
+    confidence: 90,
+    note: 'Scheduled PM'
+  }, {
+    name: 'DI resin replacement (V-201A/B)',
+    q: 'Q2',
+    cost: 50000,
+    status: 'approved',
+    confidence: 92,
+    note: 'Routine PM'
+  }, {
+    name: 'Contingency reserve',
+    q: '—',
+    cost: 70000,
+    status: 'reserve',
+    confidence: 'n/a',
+    note: 'Unallocated'
+  }]
+}, {
+  id: 1,
+  label: 'Snapshot 1',
+  date: 'January (Day 90)',
+  title: 'Reoptimization After Fleet Diagnosis',
+  description: 'Resolve Predict delivers fleet diagnosis. Copperleaf reoptimizes: water fix elevated to top priority. Tier 1 replacements added. Module 17 accelerated. Transformer deferred. Conditional Tier 2 budget held.',
+  total: 3970000,
+  conditional: 1350000,
+  items: [{
+    name: 'Emergency resin replacement V-201A/B',
+    q: 'Immediate',
+    cost: 50000,
+    status: 'approved-urgent',
+    confidence: 97,
+    note: 'CoF revised Low→Severe (22:1 return)'
+  }, {
+    name: 'Secondary iron filtration V-202',
+    q: 'Q2',
+    cost: 150000,
+    status: 'approved-new',
+    confidence: 97,
+    note: 'NEW — structural fix'
+  }, {
+    name: 'Tier 1 stack replacements (×4)',
+    q: 'Q3',
+    cost: 2800000,
+    status: 'approved-new',
+    confidence: 92,
+    note: 'NEW — emergency capital'
+  }, {
+    name: 'Module 17 refurbishment',
+    q: 'Q3',
+    cost: 450000,
+    status: 'accelerated',
+    confidence: 88,
+    note: 'Pulled from Q4 → bundle with Tier 1 outage'
+  }, {
+    name: 'Cooling system tower refurb',
+    q: 'Q4',
+    cost: 240000,
+    status: 'preserved',
+    confidence: 88,
+    note: 'Unchanged'
+  }, {
+    name: 'Rectifier PM bundle',
+    q: 'Q3',
+    cost: 180000,
+    status: 'preserved',
+    confidence: 90,
+    note: 'Unchanged'
+  }, {
+    name: 'Transformer T-401 overhaul',
+    q: 'Y2 Q1',
+    cost: 380000,
+    status: 'deferred',
+    confidence: 85,
+    note: 'Safe to defer 6 mo per condition data'
+  }, {
+    name: 'Module 12 refurbishment',
+    q: 'Y2 Q3',
+    cost: 450000,
+    status: 'pushed',
+    confidence: 78,
+    note: 'Condition better than originally assessed'
+  }, {
+    name: 'Tier 2 conditional reserve',
+    q: 'Day 60',
+    cost: 1350000,
+    status: 'conditional',
+    confidence: 68,
+    note: 'Held — no WO created'
+  }]
+}, {
+  id: 2,
+  label: 'Snapshot 2',
+  date: 'March (Day 150)',
+  title: 'Post Water Fix Reassessment',
+  description: 'Water repaired. 60-day monitoring shows 3 Tier 2 modules recovering (M5, M6, M7 — PoF <10%, confidence 90%+) and 4 still degrading (confidence in refurbishment 82–85%). €450K released.',
+  total: 3970000,
+  conditional: 900000,
+  released: 450000,
+  items: [{
+    name: 'Emergency resin replacement V-201A/B',
+    q: 'Complete',
+    cost: 50000,
+    status: 'complete',
+    confidence: 100,
+    note: 'Marco Ricci — water resistivity 16.8 MΩ·cm'
+  }, {
+    name: 'Secondary iron filtration V-202',
+    q: 'In design',
+    cost: 150000,
+    status: 'in-design',
+    confidence: 97,
+    note: 'AVEVA Engineering — P&ID complete'
+  }, {
+    name: 'Tier 1 stack replacements (×4)',
+    q: 'Q3',
+    cost: 2800000,
+    status: 'sequenced',
+    confidence: 92,
+    note: 'Crews booked. Stacks on order.'
+  }, {
+    name: 'Module 17 refurbishment',
+    q: 'Q3',
+    cost: 450000,
+    status: 'sequenced',
+    confidence: 90,
+    note: 'Crew C, concurrent with Tier 1'
+  }, {
+    name: 'Cooling system tower refurb',
+    q: 'Q4',
+    cost: 240000,
+    status: 'preserved',
+    confidence: 88,
+    note: 'Unchanged'
+  }, {
+    name: 'Rectifier PM bundle',
+    q: 'Q3',
+    cost: 180000,
+    status: 'preserved',
+    confidence: 90,
+    note: 'Unchanged'
+  }, {
+    name: 'Transformer T-401 overhaul',
+    q: 'Y2 Q1',
+    cost: 380000,
+    status: 'deferred',
+    confidence: 85,
+    note: 'Confirmed safe'
+  }, {
+    name: 'Module 12 refurbishment',
+    q: 'Y2 Q3',
+    cost: 450000,
+    status: 'pushed',
+    confidence: 80,
+    note: 'Post-fix monitoring confirms minimal damage'
+  }, {
+    name: 'Tier 2 — recovered (M5, M6, M7)',
+    q: '—',
+    cost: 0,
+    status: 'released',
+    confidence: 90,
+    note: '€450K released'
+  }, {
+    name: 'Tier 2 — refurb authorized (M10, M11)',
+    q: 'Q4',
+    cost: 900000,
+    status: 'conditional-firm',
+    confidence: 84,
+    note: 'Graduated to Lane 2'
+  }, {
+    name: 'Tier 2 — extended monitoring (M8, M9)',
+    q: 'Day 90',
+    cost: 0,
+    status: 'monitoring',
+    confidence: 78,
+    note: 'Mixed signals — extending'
+  }]
+}, {
+  id: 3,
+  label: 'Snapshot 3',
+  date: 'October (Day 300)',
+  title: 'Post Outage',
+  description: 'Q3 outage complete. New Tier 1 membranes commissioned. Module 17 refurbished. New AVEVA CONNECT baselines established. Fleet risk drops to nominal. Resin replacement permanently classified as capital-protected.',
+  total: 4870000,
+  conditional: 0,
+  items: [{
+    name: 'Tier 1 stack replacements (×4)',
+    q: 'Complete',
+    cost: 2800000,
+    status: 'commissioned',
+    confidence: 100,
+    note: 'New baselines established'
+  }, {
+    name: 'Module 17 refurbishment',
+    q: 'Complete',
+    cost: 450000,
+    status: 'commissioned',
+    confidence: 100,
+    note: 'MEA replaced, 20–30k hrs restored'
+  }, {
+    name: 'Secondary iron filtration V-202',
+    q: 'Complete',
+    cost: 150000,
+    status: 'commissioned',
+    confidence: 100,
+    note: 'Redundant barrier active'
+  }, {
+    name: 'Emergency resin replacement',
+    q: 'Complete',
+    cost: 50000,
+    status: 'complete',
+    confidence: 100,
+    note: 'Now capital-protected'
+  }, {
+    name: 'Tier 2 refurbishment (M10, M11)',
+    q: 'Q4',
+    cost: 900000,
+    status: 'in-execution',
+    confidence: 85,
+    note: 'Sequenced for Q4'
+  }, {
+    name: 'Tier 2 (M8, M9) — recovered',
+    q: '—',
+    cost: 0,
+    status: 'released',
+    confidence: 92,
+    note: 'Released €900K from extended monitoring'
+  }, {
+    name: 'Transformer T-401 overhaul',
+    q: 'Y2 Q1',
+    cost: 380000,
+    status: 'reinstated',
+    confidence: 88,
+    note: 'Back in plan'
+  }, {
+    name: 'Module 12 refurbishment',
+    q: 'Y2 Q3',
+    cost: 450000,
+    status: 'preserved',
+    confidence: 82,
+    note: 'Pushed per condition data'
+  }]
+}];
+const WORK_ORDER = {
+  id: 'WO-2026-01187',
+  title: 'Emergency resin replacement — Ion exchange vessels V-201A and V-201B',
+  priority: 'URGENT',
+  status: 'In Progress',
+  asset: 'GH01-WAT-01-002 (V-201A), GH01-WAT-01-003 (V-201B)',
+  duration: '6–8 hrs per vessel',
+  technician: {
+    name: 'Marco Ricci',
+    id: 'EMP-0247',
+    cert: 'Water treatment specialist + chemical handling + confined space'
+  },
+  backup: {
+    name: 'Andrea Moretti',
+    id: 'EMP-0319',
+    note: 'Reassigned from cooling water chemistry check'
+  },
+  rescheduled: {
+    name: 'Routine pump inspection P-310',
+    deferral: '48 hrs',
+    impact: 'No consequence'
+  },
+  materials: '2 pallets Purolite NRW37 nuclear-grade mixed bed (on-site)',
+  permits: ['LOTO on P-101 and P-204', 'Confined space entry permit', 'Chemical handling PPE'],
+  resolveContext: 'Resin beds V-201A/B exhausted; iron breakthrough at 85 ppb (OEM limit 20). Contamination active ~70 days. Tier 1 modules (1–4) sustained irreversible damage. Every additional hour of operation adds incremental damage to remaining 16 modules.',
+  inspectionGuidance: 'During resin removal: inspect bed internals for channeling/bypass. Photograph spent resin color (dark brown = heavy iron loading; normal = amber). After replacement: verify outlet resistivity >1 MΩ·cm and iron <5 ppb before reconnect.',
+  postExecution: {
+    startTime: '08:15',
+    endTime: '16:45',
+    duration: '7 hrs (estimated 6)',
+    findings: 'Spent resin in V-201A shows severe iron fouling. Color is dark brown vs normal amber. No evidence of channeling or bypass. Bed internals in good condition. V-201B similar condition.',
+    waterReadings: {
+      resistivity: '16.8 MΩ·cm',
+      iron: '<2 ppb',
+      dpA: '0.32 bar',
+      dpB: '0.31 bar'
+    },
+    photoCount: 8
+  }
+};
+const FMECA_UPDATES = [{
+  id: 'FM-DRAFT-001',
+  target: 'PEM Electrolyzer Membrane-Electrode Assembly',
+  assets: 'GH01-ELZ-01-001-MEM through GH01-ELZ-01-020-MEM',
+  status: 'Draft — Pending reliability engineer review',
+  fields: [{
+    k: 'New Failure Mode',
+    v: 'Accelerated membrane degradation from feedwater contamination'
+  }, {
+    k: 'Failure Mechanism',
+    v: 'Iron-induced catalyst poisoning from upstream water treatment failure. Iron >20 ppb causes self-reinforcing poisoning that accelerates under solar intermittency. Degradation correlates with position on common water header.'
+  }, {
+    k: 'Failure Effect (Local)',
+    v: 'Cell voltage rise >3 mV/day. Membrane resistance increase 15–45%. Hydrogen output degradation.'
+  }, {
+    k: 'Failure Effect (System)',
+    v: 'Correlated fleet-wide degradation across all modules on shared header. Up to 20% capacity loss if Tier 1 modules fail simultaneously. Off-taker delivery penalties.'
+  }, {
+    k: 'Detection Method',
+    v: 'AVEVA CONNECT fleet-wide anomaly detection — positional gradient pattern across modules on shared header. Cell voltage trend monitoring. Water quality tag correlation.'
+  }, {
+    k: 'Severity',
+    v: 'Major (was: not assessed for this mechanism)'
+  }, {
+    k: 'Occurrence',
+    v: 'Low-Moderate (depends on water treatment PM adherence)'
+  }, {
+    k: 'Detection Rating',
+    v: 'High (AVEVA CONNECT pattern detection demonstrated effective)'
+  }, {
+    k: 'Risk Priority',
+    v: 'High — low occurrence but major consequence due to correlated fleet impact'
+  }, {
+    k: 'Recommended Controls',
+    v: '(1) Water treatment PM classified as capital-protected. (2) Secondary iron filtration (V-202) as redundant barrier. (3) Auto AVEVA CONNECT alert when DI resistivity <5 MΩ·cm. (4) Resolve Predict cross-system correlation monitoring active.'
+  }]
+}, {
+  id: 'FM-DRAFT-002',
+  target: 'Ion Exchange Vessel DI Resin (Water Purification System)',
+  assets: 'GH01-WAT-01-002-RES, GH01-WAT-01-003-RES',
+  status: 'Draft — Pending reliability engineer review',
+  fields: [{
+    k: 'Existing Failure Mode',
+    v: 'Resin exhaustion / breakthrough'
+  }, {
+    k: 'Existing Consequence Rating',
+    v: 'Low (based on €50K resin replacement cost)'
+  }, {
+    k: 'Revised Consequence Rating',
+    v: 'Severe'
+  }, {
+    k: 'Rationale',
+    v: 'Resin exhaustion allows iron breakthrough causing cascading membrane damage across entire 20-module fleet. Demonstrated 22:1 consequence ratio (€4.5M downstream damage from €50K deferred PM). Consequence must be scored on downstream fleet impact, not asset replacement cost.'
+  }, {
+    k: 'Revised Failure Effect (System)',
+    v: 'Fleet-wide PEM catalyst poisoning. €2.8M irreversible Tier 1 damage. Up to €1.35M additional Tier 2 refurbishment. 20% production capacity at risk. Off-taker penalty exposure.'
+  }, {
+    k: 'Revised Detection',
+    v: 'Add — Resolve Predict cross-system correlation between water quality trends and electrolyzer health indices.'
+  }, {
+    k: 'Revised Controls',
+    v: '(1) Copperleaf capital-protected — deferral requires automatic downstream impact assessment. (2) Secondary iron filtration as redundant barrier. (3) Auto Copperleaf flag if resin replacement appears on any deferral candidate list.'
+  }]
+}];
+const chartTheme = () => {
+  const isLight = typeof document !== 'undefined' && document.body.classList.contains('light');
+  return isLight ? {
+    grid: 'rgba(57, 56, 86, 0.10)',
+    tick: '#6B7A8F',
+    tickLabel: '#49586F',
+    axisLine: 'rgba(57, 56, 86, 0.18)',
+    tooltipBg: '#ffffff',
+    tooltipBorder: 'rgba(57, 56, 86, 0.15)',
+    tooltipText: '#49586F',
+    tooltipLabel: '#393856'
+  } : {
+    grid: '#243446',
+    tick: '#7E8C9C',
+    tickLabel: '#B7C2CF',
+    axisLine: '#243446',
+    tooltipBg: '#0F1923',
+    tooltipBorder: '#243446',
+    tooltipText: '#B7C2CF',
+    tooltipLabel: '#B7C2CF'
+  };
+};
+const formatCurrency = n => {
+  if (n === 0) return '€0';
+  if (n >= 1000000) return `€${(n / 1000000).toFixed(2)}M`;
+  if (n >= 1000) return `€${(n / 1000).toFixed(0)}K`;
+  return `€${n}`;
+};
+const tierMeta = tier => {
+  if (tier === 1) return {
+    label: 'Tier 1',
+    cls: 'heat-red',
+    text: 'lane-1',
+    dot: '#E25C5C',
+    name: 'REPLACE'
+  };
+  if (tier === 2) return {
+    label: 'Tier 2',
+    cls: 'heat-amber',
+    text: 'lane-2',
+    dot: '#D9A741',
+    name: 'FIX & REASSESS'
+  };
+  if (tier === 3) return {
+    label: 'Tier 3',
+    cls: 'heat-green',
+    text: 'text-emerald-400',
+    dot: '#5FCB8C',
+    name: 'MONITOR'
+  };
+  if (tier === 'M17') return {
+    label: 'M17',
+    cls: 'heat-emer',
+    text: 'text-cyan-400',
+    dot: '#4FBCE6',
+    name: 'REFURBISH'
+  };
+  return {
+    label: '?',
+    cls: '',
+    text: '',
+    dot: '#666',
+    name: ''
+  };
+};
+const healthColor = h => {
+  if (h < 45) return '#E25C5C';
+  if (h < 55) return '#E8654A';
+  if (h < 68) return '#D9A741';
+  if (h < 78) return '#9DBE6B';
+  return '#5FCB8C';
+};
+const healthBgClass = h => {
+  if (h < 45) return 'heat-red';
+  if (h < 55) return 'heat-orange';
+  if (h < 65) return 'heat-amber';
+  if (h < 72) return 'heat-yellow';
+  return 'heat-green';
+};
+const statusMeta = status => {
+  const m = {
+    'approved': {
+      label: 'APPROVED',
+      color: 'text-emerald-400',
+      bg: 'bg-emerald-500/10 border-emerald-500/30'
+    },
+    'approved-urgent': {
+      label: 'URGENT APPROVED',
+      color: 'text-red-400',
+      bg: 'bg-red-500/10 border-red-500/30'
+    },
+    'approved-new': {
+      label: 'NEW THIS CYCLE',
+      color: 'text-amber-400',
+      bg: 'bg-amber-500/10 border-amber-500/30'
+    },
+    'accelerated': {
+      label: 'ACCELERATED',
+      color: 'text-amber-400',
+      bg: 'bg-amber-500/10 border-amber-500/30'
+    },
+    'preserved': {
+      label: 'PRESERVED',
+      color: 'text-ink-2',
+      bg: 'bg-white/5 border-white/10'
+    },
+    'deferred': {
+      label: 'DEFERRED (SAFE)',
+      color: 'text-cyan-400',
+      bg: 'bg-cyan-500/10 border-cyan-500/30'
+    },
+    'pushed': {
+      label: 'PUSHED',
+      color: 'text-cyan-400',
+      bg: 'bg-cyan-500/10 border-cyan-500/30'
+    },
+    'conditional': {
+      label: 'CONDITIONAL',
+      color: 'text-violet-400',
+      bg: 'bg-violet-500/10 border-violet-500/30'
+    },
+    'conditional-firm': {
+      label: 'GRADUATED → FIRM',
+      color: 'text-amber-400',
+      bg: 'bg-amber-500/10 border-amber-500/30'
+    },
+    'monitoring': {
+      label: 'MONITORING',
+      color: 'text-violet-400',
+      bg: 'bg-violet-500/10 border-violet-500/30'
+    },
+    'released': {
+      label: 'BUDGET RELEASED',
+      color: 'text-emerald-400',
+      bg: 'bg-emerald-500/10 border-emerald-500/30'
+    },
+    'sequenced': {
+      label: 'SEQUENCED',
+      color: 'text-amber-400',
+      bg: 'bg-amber-500/10 border-amber-500/30'
+    },
+    'in-design': {
+      label: 'IN DESIGN',
+      color: 'text-cyan-400',
+      bg: 'bg-cyan-500/10 border-cyan-500/30'
+    },
+    'in-execution': {
+      label: 'IN EXECUTION',
+      color: 'text-amber-400',
+      bg: 'bg-amber-500/10 border-amber-500/30'
+    },
+    'complete': {
+      label: 'COMPLETE',
+      color: 'text-emerald-400',
+      bg: 'bg-emerald-500/10 border-emerald-500/30'
+    },
+    'commissioned': {
+      label: 'COMMISSIONED',
+      color: 'text-emerald-400',
+      bg: 'bg-emerald-500/10 border-emerald-500/30'
+    },
+    'reinstated': {
+      label: 'REINSTATED',
+      color: 'text-emerald-400',
+      bg: 'bg-emerald-500/10 border-emerald-500/30'
+    },
+    'reserve': {
+      label: 'RESERVE',
+      color: 'text-ink-3',
+      bg: 'bg-white/5 border-white/10'
+    }
+  };
+  return m[status] || {
+    label: status.toUpperCase(),
+    color: 'text-ink-2',
+    bg: 'bg-white/5 border-white/10'
+  };
+};
+const Pill = ({
+  children,
+  className = '',
+  color = 'default'
+}) => {
+  const colors = {
+    default: 'bg-white/5 text-ink-2 border-white/10',
+    cyan: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
+    amber: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+    coral: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
+    emerald: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+    red: 'bg-red-500/10 text-red-400 border-red-500/30',
+    violet: 'bg-violet-500/10 text-violet-400 border-violet-500/30'
+  };
+  return React.createElement("span", {
+    className: `inline-flex items-center gap-1.5 px-2 py-0.5 text-[10.5px] font-semibold tracking-wider uppercase border rounded ${colors[color]} ${className}`
+  }, children);
+};
+const KV = ({
+  k,
+  v,
+  mono = false
+}) => React.createElement("div", {
+  className: "flex flex-col gap-0.5"
+}, React.createElement("div", {
+  className: "text-[10px] uppercase tracking-wider ink-3 font-semibold"
+}, k), React.createElement("div", {
+  className: `text-sm ${mono ? 'num' : ''} text-ink`
+}, v));
+const Panel = ({
+  title,
+  subtitle,
+  accent,
+  children,
+  className = '',
+  actions
+}) => {
+  const accentColors = {
+    cyan: 'border-l-cyan-500',
+    amber: 'border-l-amber-500',
+    coral: 'border-l-orange-500',
+    emerald: 'border-l-emerald-500',
+    violet: 'border-l-violet-500',
+    red: 'border-l-red-500'
+  };
+  return React.createElement("div", {
+    className: `panel rounded-md ${accent ? `border-l-[3px] ${accentColors[accent]}` : ''} ${className}`
+  }, title && React.createElement("div", {
+    className: "head-grad px-4 py-3 border-b divider flex items-start justify-between gap-3"
+  }, React.createElement("div", null, React.createElement("div", {
+    className: "text-[13px] font-bold tracking-tight"
+  }, title), subtitle && React.createElement("div", {
+    className: "text-[11px] ink-3 mt-0.5"
+  }, subtitle)), actions), children);
+};
+const SYSTEMS = [{
+  id: 'aveva',
+  label: 'AVEVA CONNECT',
+  subtitle: 'Monitor',
+  color: 'cyan',
+  role: 'See the pattern'
+}, {
+  id: 'resolve',
+  label: 'Resolve Predict',
+  subtitle: 'Diagnose & Prescribe',
+  color: 'amber',
+  role: 'Reason across the fleet'
+}, {
+  id: 'ifs',
+  label: 'IFS Cloud',
+  subtitle: 'Execute',
+  color: 'coral',
+  role: 'Dispatch and complete'
+}, {
+  id: 'copperleaf',
+  label: 'Copperleaf',
+  subtitle: 'Optimize',
+  color: 'emerald',
+  role: 'Reoptimize the plan'
+}];
+const TopBar = ({
+  system,
+  onSystem,
+  theme,
+  onToggleTheme
+}) => {
+  const colorMap = {
+    cyan: {
+      active: 'text-cyan-300 border-cyan-400',
+      dot: '#4FBCE6'
+    },
+    amber: {
+      active: 'text-amber-300 border-amber-400',
+      dot: '#D9A741'
+    },
+    coral: {
+      active: 'text-orange-300 border-orange-400',
+      dot: '#E8654A'
+    },
+    emerald: {
+      active: 'text-emerald-300 border-emerald-400',
+      dot: '#5FCB8C'
+    }
+  };
+  return React.createElement("div", {
+    className: "border-b divider sticky top-0 z-20 backdrop-blur topbar-bg"
+  }, React.createElement("div", {
+    className: "max-w-[1680px] mx-auto px-6 py-3 flex items-center justify-between gap-6"
+  }, React.createElement("div", {
+    className: "flex items-center gap-4"
+  }, React.createElement("div", {
+    className: "flex items-center gap-2.5"
+  }, React.createElement("div", {
+    className: "w-7 h-7 rounded grid place-items-center",
+    style: {
+      background: theme === 'light' ? 'linear-gradient(135deg, #E5E9F0, #C9D2DE)' : 'linear-gradient(135deg, #1A2B3D, #2E4257)',
+      border: '1px solid var(--line-2)'
+    }
+  }, React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 14 14",
+    fill: "none"
+  }, React.createElement("path", {
+    d: "M2 12 L7 2 L12 12",
+    stroke: theme === 'light' ? '#1a8cba' : '#4FBCE6',
+    strokeWidth: "1.5",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }), React.createElement("circle", {
+    cx: "7",
+    cy: "8",
+    r: "1.5",
+    fill: theme === 'light' ? '#c08820' : '#D9A741'
+  }))), React.createElement("div", {
+    className: "leading-tight"
+  }, React.createElement("div", {
+    className: "text-[12px] font-bold tracking-tight"
+  }, "Lombardia Verde Idrogeno"), React.createElement("div", {
+    className: "text-[10px] ink-3 tracking-wide label-mono"
+  }, "GH01 \xB7 100 MW Green H\u2082 \xB7 Lombardy, IT"))), React.createElement("div", {
+    className: "hidden md:flex items-center gap-2 pl-4 border-l divider"
+  }, React.createElement("div", {
+    className: "w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"
+  }), React.createElement("div", {
+    className: "text-[10.5px] ink-2 tracking-wide label-mono"
+  }, "UNIFIED PLATFORM \xB7 LIVE"))), React.createElement("div", {
+    className: "flex items-center gap-1"
+  }, SYSTEMS.map((s, i) => {
+    const c = colorMap[s.color];
+    const active = system === s.id;
+    return React.createElement(Fragment, {
+      key: s.id
+    }, React.createElement("button", {
+      onClick: () => onSystem(s.id),
+      className: `relative px-3.5 py-1.5 rounded text-left transition-all ${active ? 'panel-2' : 'hover:bg-white/[0.03]'}`,
+      style: {
+        borderTop: active ? `2px solid ${c.dot}` : '2px solid transparent'
+      }
+    }, React.createElement("div", {
+      className: `text-[12px] font-semibold tracking-tight ${active ? c.active : 'text-ink'}`
+    }, s.label), React.createElement("div", {
+      className: `text-[9.5px] uppercase tracking-wider ${active ? 'ink-2' : 'ink-3'}`
+    }, s.subtitle)), i < SYSTEMS.length - 1 && React.createElement("div", {
+      className: "text-ink-4 text-xs px-0.5"
+    }, "\u2192"));
+  })), React.createElement("div", {
+    className: "hidden lg:flex items-center gap-3 text-[10.5px] ink-3"
+  }, React.createElement("div", {
+    className: "label-mono"
+  }, "Today \xB7 Day 0"), React.createElement("div", {
+    className: "div-vert w-px h-4"
+  }), React.createElement("div", {
+    className: "num"
+  }, "14:32 CET"), React.createElement("button", {
+    onClick: onToggleTheme,
+    className: "theme-toggle",
+    title: theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode',
+    "aria-label": "Toggle theme"
+  }, theme === 'light' ? React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, React.createElement("path", {
+    d: "M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+  })) : React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "4"
+  }), React.createElement("path", {
+    d: "M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+  }))))));
+};
+const StoryArc = ({
+  system
+}) => {
+  const stages = [{
+    id: 'aveva',
+    label: 'Detect',
+    color: '#4FBCE6'
+  }, {
+    id: 'resolve',
+    label: 'Diagnose',
+    color: '#D9A741'
+  }, {
+    id: 'ifs',
+    label: 'Execute',
+    color: '#E8654A'
+  }, {
+    id: 'copperleaf',
+    label: 'Optimize',
+    color: '#5FCB8C'
+  }];
+  const activeIdx = stages.findIndex(s => s.id === system);
+  return React.createElement("div", {
+    className: "max-w-[1680px] mx-auto px-6 pt-3 pb-1"
+  }, React.createElement("div", {
+    className: "flex items-center gap-2 text-[10.5px] uppercase tracking-[0.14em] ink-3"
+  }, React.createElement("span", {
+    className: "font-serif italic ink-4 text-[12px] normal-case tracking-normal"
+  }, "The Asset Lifecycle Loop"), React.createElement("div", {
+    className: "flex-1 h-px",
+    style: {
+      background: 'linear-gradient(90deg, var(--line) 0%, transparent 100%)'
+    }
+  }), stages.map((s, i) => React.createElement(Fragment, {
+    key: s.id
+  }, React.createElement("span", {
+    className: `flex items-center gap-1.5 ${i === activeIdx ? 'text-ink' : ''}`
+  }, React.createElement("span", {
+    className: "w-1.5 h-1.5 rounded-full",
+    style: {
+      background: i <= activeIdx ? s.color : 'var(--line-2)'
+    }
+  }), s.label), i < stages.length - 1 && React.createElement("span", {
+    className: "ink-4"
+  }, "\u203A")))));
+};
+const Breadcrumb = ({
+  items
+}) => React.createElement("div", {
+  className: "flex items-center gap-2 text-[11.5px]"
+}, items.map((it, i) => React.createElement(Fragment, {
+  key: i
+}, React.createElement("span", {
+  className: i === items.length - 1 ? 'text-cyan-300 font-semibold' : 'ink-3'
+}, it), i < items.length - 1 && React.createElement("span", {
+  className: "ink-4"
+}, "\u203A"))));
+const MetricTile = ({
+  label,
+  value,
+  unit,
+  sub,
+  color = 'default',
+  trend
+}) => {
+  const colorClasses = {
+    default: 'text-ink',
+    red: 'text-red-400',
+    amber: 'text-amber-300',
+    cyan: 'text-cyan-300',
+    emerald: 'text-emerald-400'
+  };
+  return React.createElement("div", {
+    className: "panel-2 rounded-md p-3.5"
+  }, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold"
+  }, label), React.createElement("div", {
+    className: "flex items-baseline gap-1.5 mt-1"
+  }, React.createElement("span", {
+    className: `num text-2xl font-bold ${colorClasses[color]}`
+  }, value), unit && React.createElement("span", {
+    className: "text-[11px] ink-3 num"
+  }, unit)), sub && React.createElement("div", {
+    className: "text-[10.5px] ink-3 mt-1"
+  }, sub), trend && React.createElement("div", {
+    className: `text-[10.5px] font-semibold mt-1 ${trend.startsWith('↓') ? 'text-red-400' : trend.startsWith('↑') ? 'text-amber-300' : 'ink-2'}`
+  }, trend));
+};
+const ModuleTile = ({
+  mod,
+  selected,
+  onClick
+}) => {
+  const meta = tierMeta(mod.tier);
+  const isM17 = mod.tier === 'M17';
+  return React.createElement("button", {
+    onClick: () => onClick(mod),
+    className: `mod-tile relative rounded-md border ${healthBgClass(mod.health)} ${isM17 ? 'm17-ring' : ''} ${selected ? 'ring-2 ring-cyan-400' : ''} p-2.5 text-left`
+  }, React.createElement("div", {
+    className: "flex items-start justify-between mb-1.5"
+  }, React.createElement("div", {
+    className: "text-[10px] num font-semibold ink-2"
+  }, "M", String(mod.id).padStart(2, '0')), isM17 && React.createElement("div", {
+    className: "text-[9px] font-bold tracking-wider text-cyan-300"
+  }, "DUAL")), React.createElement("div", {
+    className: "flex items-baseline gap-1"
+  }, React.createElement("span", {
+    className: "num text-xl font-bold",
+    style: {
+      color: healthColor(mod.health)
+    }
+  }, mod.health), React.createElement("span", {
+    className: "text-[9px] ink-3"
+  }, "/100")), React.createElement("div", {
+    className: "text-[9.5px] ink-3 num mt-0.5"
+  }, "+", mod.rate, " mV/d"));
+};
+const ModuleDetail = ({
+  mod,
+  onClose
+}) => {
+  if (!mod) return null;
+  const meta = tierMeta(mod.tier);
+  const pof = PoF[mod.id];
+  return React.createElement("div", {
+    className: "panel-2 rounded-md border-l-[3px] border-l-cyan-500 p-4"
+  }, React.createElement("div", {
+    className: "flex items-start justify-between mb-3"
+  }, React.createElement("div", null, React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, React.createElement("div", {
+    className: "text-[14px] font-bold"
+  }, "Module ", mod.id, " \xB7 GH01-ELZ-01-", String(mod.id).padStart(3, '0')), React.createElement(Pill, {
+    color: mod.tier === 1 ? 'red' : mod.tier === 2 ? 'amber' : mod.tier === 'M17' ? 'cyan' : 'emerald'
+  }, meta.label), mod.dualMechanism && React.createElement(Pill, {
+    color: "cyan"
+  }, "Aging + Contamination")), React.createElement("div", {
+    className: "text-[11px] ink-3 mt-0.5"
+  }, "Header position ", mod.pos, " \xB7 ", mod.hours.toLocaleString(), " operating hours")), React.createElement("button", {
+    onClick: onClose,
+    className: "text-ink-3 hover:text-ink text-xl leading-none"
+  }, "\xD7")), React.createElement("div", {
+    className: "grid grid-cols-5 gap-3 mb-3"
+  }, React.createElement(KV, {
+    k: "Health Index",
+    v: React.createElement("span", {
+      className: "num text-lg font-bold",
+      style: {
+        color: healthColor(mod.health)
+      }
+    }, mod.health)
+  }), React.createElement(KV, {
+    k: "Cell Voltage",
+    v: `${mod.voltage} mV`,
+    mono: true
+  }), React.createElement(KV, {
+    k: "Rise Rate",
+    v: `+${mod.rate} mV/day`,
+    mono: true
+  }), React.createElement(KV, {
+    k: "Membrane Resist.",
+    v: `+${mod.resist}%`,
+    mono: true
+  }), React.createElement(KV, {
+    k: "Stack Temp \u0394",
+    v: `+${mod.tempDelta}°C`,
+    mono: true
+  })), mod.id === 3 && React.createElement("div", {
+    className: "mt-3 pt-3 border-t divider"
+  }, React.createElement("div", {
+    className: "text-[11px] ink-2 font-semibold mb-2"
+  }, "ELZ.03.CellVoltage \xB7 Last 90 days"), React.createElement(ResponsiveContainer, {
+    width: "100%",
+    height: 140
+  }, React.createElement(AreaChart, {
+    data: MOD3_VOLTAGE,
+    margin: {
+      top: 8,
+      right: 8,
+      left: 0,
+      bottom: 0
+    }
+  }, React.createElement("defs", null, React.createElement("linearGradient", {
+    id: "vGrad",
+    x1: "0",
+    y1: "0",
+    x2: "0",
+    y2: "1"
+  }, React.createElement("stop", {
+    offset: "0%",
+    stopColor: "#E25C5C",
+    stopOpacity: 0.45
+  }), React.createElement("stop", {
+    offset: "100%",
+    stopColor: "#E25C5C",
+    stopOpacity: 0.02
+  }))), React.createElement(CartesianGrid, {
+    stroke: chartTheme().grid,
+    strokeDasharray: "2 4",
+    vertical: false
+  }), React.createElement(XAxis, {
+    dataKey: "day",
+    stroke: chartTheme().tick,
+    tick: {
+      fontSize: 10,
+      fill: chartTheme().tick
+    },
+    tickLine: false,
+    axisLine: {
+      stroke: '#243446'
+    },
+    tickFormatter: d => d === 0 ? 'Today' : `${d}d`
+  }), React.createElement(YAxis, {
+    stroke: chartTheme().tick,
+    tick: {
+      fontSize: 10,
+      fill: chartTheme().tick
+    },
+    tickLine: false,
+    axisLine: false,
+    domain: [1800, 3000]
+  }), React.createElement(Tooltip, {
+    contentStyle: {
+      background: chartTheme().tooltipBg,
+      border: '1px solid ' + chartTheme().tooltipBorder,
+      borderRadius: 4,
+      fontSize: 11
+    },
+    labelStyle: {
+      color: chartTheme().tooltipLabel
+    },
+    itemStyle: {
+      color: '#E25C5C'
+    },
+    formatter: v => [`${v} mV`, 'Cell V']
+  }), React.createElement(ReferenceLine, {
+    y: 1850,
+    stroke: "#5FCB8C",
+    strokeDasharray: "3 3",
+    label: {
+      value: 'Baseline 1850 mV',
+      fontSize: 9,
+      fill: '#5FCB8C',
+      position: 'insideTopLeft'
+    }
+  }), React.createElement(ReferenceLine, {
+    x: -70,
+    stroke: "#D9A741",
+    strokeDasharray: "2 3",
+    label: {
+      value: 'Contamination onset',
+      fontSize: 9,
+      fill: '#D9A741',
+      position: 'top'
+    }
+  }), React.createElement(Area, {
+    type: "monotone",
+    dataKey: "voltage",
+    stroke: "#E25C5C",
+    strokeWidth: 1.5,
+    fill: "url(#vGrad)"
+  }))), React.createElement("div", {
+    className: "text-[10.5px] ink-3 mt-1 font-serif italic"
+  }, "Rise rate +12 mV/day vs normal <2 mV/day \xB7 accelerating")), pof && React.createElement("div", {
+    className: "mt-3 pt-3 border-t divider"
+  }, React.createElement("div", {
+    className: "flex items-center gap-2 text-[11px] mb-1.5"
+  }, React.createElement("span", {
+    className: "ink-3 uppercase tracking-wider font-semibold text-[10px]"
+  }, "Resolve Predict assessment"), React.createElement("span", {
+    className: "num text-[10.5px] ink-2"
+  }, "conf ", pof.conf, "%")), React.createElement("div", {
+    className: "grid grid-cols-4 gap-3"
+  }, React.createElement(KV, {
+    k: "PoF 30d",
+    v: `${pof.d30}%`,
+    mono: true
+  }), React.createElement(KV, {
+    k: "PoF 90d",
+    v: `${pof.d90}%`,
+    mono: true
+  }), React.createElement(KV, {
+    k: "PoF 365d",
+    v: `${pof.d365}%`,
+    mono: true
+  }), React.createElement(KV, {
+    k: "CoF",
+    v: pof.cof
+  })), pof.special && React.createElement("div", {
+    className: "text-[10.5px] text-cyan-300 mt-2 font-serif italic"
+  }, pof.special)));
+};
+const AvevaConnectView = ({
+  onTransition
+}) => {
+  const [selectedMod, setSelectedMod] = useState(MODULES.find(m => m.id === 3));
+  const tier1 = MODULES.filter(m => m.tier === 1);
+  const tier2 = MODULES.filter(m => m.tier === 2);
+  const tier3 = MODULES.filter(m => m.tier === 3);
+  const fleetAvgHealth = Math.round(MODULES.reduce((a, m) => a + m.health, 0) / MODULES.length);
+  return React.createElement("div", {
+    className: "max-w-[1680px] mx-auto px-6 pb-10 tab-fade"
+  }, React.createElement("div", {
+    className: "flex items-center justify-between mb-4"
+  }, React.createElement(Breadcrumb, {
+    items: ['Fleet', 'GH01 · Lombardia Verde Idrogeno', 'GH01-ELZ · Electrolysis Unit']
+  }), React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, React.createElement(Pill, {
+    color: "emerald"
+  }, React.createElement("span", {
+    className: "w-1 h-1 rounded-full bg-emerald-400 pulse-dot mr-1"
+  }), " Live \xB7 30s refresh"), React.createElement(Pill, {
+    color: "cyan"
+  }, "AVEVA PI Server \xB7 47k tags"))), React.createElement("div", {
+    className: "panel rounded-md border-l-[3px] border-l-cyan-500 p-5 mb-4"
+  }, React.createElement("div", {
+    className: "flex items-start justify-between gap-4 flex-wrap"
+  }, React.createElement("div", null, React.createElement("div", {
+    className: "text-[11px] uppercase tracking-wider ink-3 font-semibold mb-1"
+  }, "Electrolysis Unit \xB7 GH01-ELZ-01"), React.createElement("div", {
+    className: "text-xl font-bold tracking-tight"
+  }, "20\xD7 PEM Electrolyzer Stack Modules \xB7 5 MW each"), React.createElement("div", {
+    className: "text-[12px] ink-2 mt-1"
+  }, "All modules drawing feedwater from shared header. ", React.createElement("span", {
+    className: "font-serif italic text-amber-300"
+  }, "Fleet-wide pattern detected by anomaly engine."))), React.createElement("div", {
+    className: "flex gap-3 flex-wrap"
+  }, React.createElement(Pill, {
+    color: "red"
+  }, React.createElement("span", {
+    className: "w-1.5 h-1.5 rounded-full bg-red-400 pulse-dot mr-1"
+  }), " 4 SEVERE \xB7 TIER 1"), React.createElement(Pill, {
+    color: "amber"
+  }, "8 MODERATE \xB7 TIER 2 + M17"), React.createElement(Pill, {
+    color: "emerald"
+  }, "8 MILD \xB7 TIER 3")))), React.createElement("div", {
+    className: "grid grid-cols-2 lg:grid-cols-6 gap-3 mb-5"
+  }, React.createElement(MetricTile, {
+    label: "Fleet Avg Health",
+    value: fleetAvgHealth,
+    unit: "/ 100",
+    color: "amber",
+    trend: "\u2193 28 pts in 70 days",
+    sub: "baseline 85"
+  }), React.createElement(MetricTile, {
+    label: "DI Water Resist.",
+    value: "0.4",
+    unit: "M\u03A9\xB7cm",
+    color: "red",
+    trend: "\u2193 spec 1.0",
+    sub: "baseline 16.0"
+  }), React.createElement(MetricTile, {
+    label: "Fe in Feedwater",
+    value: "85",
+    unit: "ppb",
+    color: "red",
+    trend: "\u2191 4.25\xD7 OEM limit",
+    sub: "OEM <20 ppb"
+  }), React.createElement(MetricTile, {
+    label: "IX Vessel \u0394P",
+    value: "1.6",
+    unit: "bar",
+    color: "red",
+    trend: "\u2191 alarm 1.5",
+    sub: "V-201A \xB7 baseline 0.3"
+  }), React.createElement(MetricTile, {
+    label: "Production",
+    value: "92",
+    unit: "%",
+    color: "amber",
+    trend: "\u2193 5 pts",
+    sub: "off-taker target 97%"
+  }), React.createElement(MetricTile, {
+    label: "Active Alerts",
+    value: "23",
+    color: "red",
+    sub: "from anomaly engine",
+    trend: "\u2191 18 in 24h"
+  })), React.createElement(Panel, {
+    title: "Fleet Module Grid \xB7 Health Index by Header Position",
+    subtitle: "Click a module for sensor detail. Color gradient reveals the positional pattern \u2014 reds clustered at the inlet (Pos 1\u20134), greens at the far end (Pos 12\u201320). Module 17 (DUAL) tagged independently.",
+    accent: "cyan",
+    className: "mb-4",
+    actions: React.createElement("div", {
+      className: "flex items-center gap-3 text-[10px] ink-3 tracking-wider uppercase font-semibold"
+    }, React.createElement("span", {
+      className: "flex items-center gap-1"
+    }, React.createElement("span", {
+      className: "w-2.5 h-2.5 rounded heat-red"
+    }), "Health <45"), React.createElement("span", {
+      className: "flex items-center gap-1"
+    }, React.createElement("span", {
+      className: "w-2.5 h-2.5 rounded heat-amber"
+    }), "45\u201365"), React.createElement("span", {
+      className: "flex items-center gap-1"
+    }, React.createElement("span", {
+      className: "w-2.5 h-2.5 rounded heat-green"
+    }), ">65"), React.createElement("span", {
+      className: "flex items-center gap-1"
+    }, React.createElement("span", {
+      className: "w-2.5 h-2.5 rounded m17-ring"
+    }), "Dual mech."))
+  }, React.createElement("div", {
+    className: "p-4"
+  }, React.createElement("div", {
+    className: "flex items-center gap-3 mb-2.5"
+  }, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold"
+  }, "Header inlet"), React.createElement("div", {
+    className: "flex-1 h-px",
+    style: {
+      background: 'linear-gradient(90deg, rgba(226,92,92,0.5) 0%, rgba(217,167,65,0.4) 50%, rgba(95,203,140,0.4) 100%)'
+    }
+  }), React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold"
+  }, "Header outlet")), React.createElement("div", {
+    className: "grid grid-cols-10 gap-2"
+  }, MODULES.map(m => React.createElement(ModuleTile, {
+    key: m.id,
+    mod: m,
+    selected: selectedMod && selectedMod.id === m.id,
+    onClick: setSelectedMod
+  }))))), selectedMod && React.createElement("div", {
+    className: "mb-4"
+  }, React.createElement(ModuleDetail, {
+    mod: selectedMod,
+    onClose: () => setSelectedMod(null)
+  })), React.createElement(Panel, {
+    title: "Water Purification System \xB7 Last 120 Days",
+    subtitle: "DI water resistivity and iron concentration overlaid on fleet average health. The vertical line at Day \u221270 marks the contamination onset \u2014 the same day every electrolyzer module began degrading.",
+    accent: "cyan",
+    className: "mb-5"
+  }, React.createElement("div", {
+    className: "p-4"
+  }, React.createElement(ResponsiveContainer, {
+    width: "100%",
+    height: 280
+  }, React.createElement(ComposedChart, {
+    data: WATER_TIMELINE,
+    margin: {
+      top: 10,
+      right: 12,
+      left: 0,
+      bottom: 0
+    }
+  }, React.createElement("defs", null, React.createElement("linearGradient", {
+    id: "resGrad",
+    x1: "0",
+    y1: "0",
+    x2: "0",
+    y2: "1"
+  }, React.createElement("stop", {
+    offset: "0%",
+    stopColor: "#4FBCE6",
+    stopOpacity: 0.35
+  }), React.createElement("stop", {
+    offset: "100%",
+    stopColor: "#4FBCE6",
+    stopOpacity: 0.02
+  })), React.createElement("linearGradient", {
+    id: "ironGrad",
+    x1: "0",
+    y1: "0",
+    x2: "0",
+    y2: "1"
+  }, React.createElement("stop", {
+    offset: "0%",
+    stopColor: "#E25C5C",
+    stopOpacity: 0.30
+  }), React.createElement("stop", {
+    offset: "100%",
+    stopColor: "#E25C5C",
+    stopOpacity: 0.02
+  }))), React.createElement(CartesianGrid, {
+    stroke: chartTheme().grid,
+    strokeDasharray: "2 4",
+    vertical: false
+  }), React.createElement(XAxis, {
+    dataKey: "day",
+    stroke: chartTheme().tick,
+    tick: {
+      fontSize: 10,
+      fill: chartTheme().tick
+    },
+    tickLine: false,
+    axisLine: {
+      stroke: '#243446'
+    },
+    tickFormatter: d => d === 0 ? 'Today' : `${d}d`
+  }), React.createElement(YAxis, {
+    yAxisId: "left",
+    stroke: "#4FBCE6",
+    tick: {
+      fontSize: 10,
+      fill: '#4FBCE6'
+    },
+    tickLine: false,
+    axisLine: false,
+    label: {
+      value: 'MΩ·cm  /  Health',
+      angle: -90,
+      position: 'insideLeft',
+      fontSize: 10,
+      fill: chartTheme().tick
+    }
+  }), React.createElement(YAxis, {
+    yAxisId: "right",
+    orientation: "right",
+    stroke: "#E25C5C",
+    tick: {
+      fontSize: 10,
+      fill: '#E25C5C'
+    },
+    tickLine: false,
+    axisLine: false,
+    label: {
+      value: 'Fe (ppb)',
+      angle: 90,
+      position: 'insideRight',
+      fontSize: 10,
+      fill: chartTheme().tick
+    }
+  }), React.createElement(Tooltip, {
+    contentStyle: {
+      background: chartTheme().tooltipBg,
+      border: '1px solid ' + chartTheme().tooltipBorder,
+      borderRadius: 4,
+      fontSize: 11
+    },
+    labelStyle: {
+      color: chartTheme().tooltipLabel
+    },
+    labelFormatter: d => d === 0 ? 'Today' : `Day ${d}`
+  }), React.createElement(ReferenceArea, {
+    yAxisId: "left",
+    y1: 0,
+    y2: 1,
+    fill: "#E25C5C",
+    fillOpacity: 0.05
+  }), React.createElement(ReferenceLine, {
+    yAxisId: "left",
+    y: 1,
+    stroke: "#E25C5C",
+    strokeDasharray: "3 3",
+    label: {
+      value: 'Spec 1 MΩ·cm',
+      fontSize: 9,
+      fill: '#E25C5C',
+      position: 'insideTopRight'
+    }
+  }), React.createElement(ReferenceLine, {
+    yAxisId: "right",
+    y: 20,
+    stroke: "#E25C5C",
+    strokeDasharray: "3 3",
+    label: {
+      value: 'OEM 20 ppb',
+      fontSize: 9,
+      fill: '#E25C5C',
+      position: 'insideBottomRight'
+    }
+  }), React.createElement(ReferenceLine, {
+    yAxisId: "left",
+    x: -70,
+    stroke: "#D9A741",
+    strokeWidth: 1.5,
+    label: {
+      value: 'Contamination onset',
+      fontSize: 10,
+      fill: '#D9A741',
+      position: 'top'
+    }
+  }), React.createElement(Area, {
+    yAxisId: "left",
+    type: "monotone",
+    dataKey: "resistivity",
+    stroke: "#4FBCE6",
+    strokeWidth: 1.5,
+    fill: "url(#resGrad)",
+    name: "DI Resistivity (M\u03A9\xB7cm)"
+  }), React.createElement(Area, {
+    yAxisId: "right",
+    type: "monotone",
+    dataKey: "iron",
+    stroke: "#E25C5C",
+    strokeWidth: 1.5,
+    fill: "url(#ironGrad)",
+    name: "Fe (ppb)"
+  }), React.createElement(Line, {
+    yAxisId: "left",
+    type: "monotone",
+    dataKey: "fleetHealth",
+    stroke: "#D9A741",
+    strokeWidth: 1.5,
+    dot: false,
+    name: "Fleet Avg Health"
+  }))), React.createElement("div", {
+    className: "grid grid-cols-3 gap-4 mt-4 pt-3 border-t divider"
+  }, React.createElement("div", null, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold"
+  }, "WAT.DI.Resistivity"), React.createElement("div", {
+    className: "text-[13px] num font-bold text-red-400"
+  }, "0.4 M\u03A9\xB7cm ", React.createElement("span", {
+    className: "ink-3 font-normal"
+  }, "today \xB7 was 16"))), React.createElement("div", null, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold"
+  }, "WAT.DI.IronConc"), React.createElement("div", {
+    className: "text-[13px] num font-bold text-red-400"
+  }, "85 ppb ", React.createElement("span", {
+    className: "ink-3 font-normal"
+  }, "today \xB7 4.25\xD7 OEM"))), React.createElement("div", null, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold"
+  }, "WAT.IX.DiffPressure"), React.createElement("div", {
+    className: "text-[13px] num font-bold text-red-400"
+  }, "1.6 / 1.5 bar ", React.createElement("span", {
+    className: "ink-3 font-normal"
+  }, "V-201A/B \xB7 alarm 1.5")))))), React.createElement("div", {
+    className: "panel rounded-md p-5",
+    style: {
+      background: 'linear-gradient(135deg, rgba(217,167,65,0.06) 0%, var(--bg-1) 60%)',
+      borderLeft: '3px solid var(--amber)'
+    }
+  }, React.createElement("div", {
+    className: "flex items-start justify-between gap-6 flex-wrap"
+  }, React.createElement("div", {
+    className: "max-w-3xl"
+  }, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-amber-300 font-bold mb-1.5"
+  }, "AVEVA CONNECT has done its job"), React.createElement("div", {
+    className: "text-base font-bold tracking-tight mb-1"
+  }, "It has shown what is happening. It cannot tell you why, or what to do."), React.createElement("div", {
+    className: "text-[12px] ink-2 font-serif italic leading-relaxed"
+  }, "The drill-down is vertical: fleet \u2192 plant \u2192 system \u2192 asset. The next step is horizontal \u2014 reasoning across all 20 modules at once, combined with work order history, OEM specs, and operating context. ", React.createElement("span", {
+    className: "text-amber-300 not-italic font-sans font-semibold"
+  }, "That is Resolve Predict."))), React.createElement("button", {
+    onClick: () => onTransition('resolve'),
+    className: "px-5 py-3 rounded font-bold text-[12px] tracking-wide flex items-center gap-2 transition-transform hover:translate-x-0.5",
+    style: {
+      background: 'var(--grad-resolve)',
+      color: '#0A1018'
+    }
+  }, "OPEN IN RESOLVE PREDICT", React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 14 14",
+    fill: "none"
+  }, React.createElement("path", {
+    d: "M3 7 H11 M7 3 L11 7 L7 11",
+    stroke: "currentColor",
+    strokeWidth: "1.8",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }))))));
+};
+const RP_TABS = [{
+  id: 'diagnosis',
+  label: 'Diagnosis & Root Cause',
+  subtitle: 'Fleet-level reasoning'
+}, {
+  id: 'assessment',
+  label: 'Fleet Assessment',
+  subtitle: 'PoF · CoF · Confidence'
+}, {
+  id: 'actions',
+  label: 'Recommended Actions',
+  subtitle: 'Routing across 3 lanes'
+}];
+const ConfidenceMeter = ({
+  value,
+  label = true
+}) => {
+  const color = value >= 85 ? '#5FCB8C' : value >= 75 ? '#D9A741' : '#9985E8';
+  return React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, React.createElement("div", {
+    className: "relative w-16 h-1.5 rounded-full bg-white/5 overflow-hidden"
+  }, React.createElement("div", {
+    className: "absolute inset-y-0 left-0 rounded-full",
+    style: {
+      width: `${value}%`,
+      background: color
+    }
+  })), label && React.createElement("span", {
+    className: "num text-[11px] font-semibold",
+    style: {
+      color
+    }
+  }, value, "%"));
+};
+const EvidenceCard = ({
+  ev,
+  expanded,
+  onToggle
+}) => {
+  return React.createElement("div", {
+    className: `panel-2 rounded-md transition-all ${expanded ? 'border-amber-500/40' : ''}`,
+    style: {
+      borderLeft: '3px solid var(--amber)'
+    }
+  }, React.createElement("button", {
+    onClick: onToggle,
+    className: "w-full flex items-start gap-4 p-4 text-left hover:bg-white/[0.02]"
+  }, React.createElement("div", {
+    className: "flex-shrink-0 mt-0.5"
+  }, React.createElement("div", {
+    className: "w-9 h-9 rounded-full grid place-items-center border",
+    style: {
+      borderColor: '#D9A741',
+      background: 'rgba(217,167,65,0.08)'
+    }
+  }, React.createElement("span", {
+    className: "step-num text-amber-300 text-base"
+  }, ev.n))), React.createElement("div", {
+    className: "flex-1 min-w-0"
+  }, React.createElement("div", {
+    className: "flex items-center gap-2 flex-wrap mb-1"
+  }, React.createElement("span", {
+    className: "text-[14px] font-bold tracking-tight"
+  }, ev.title), React.createElement(Pill, {
+    color: ev.sourceColor
+  }, ev.source)), React.createElement("div", {
+    className: "text-[12px] ink-2 leading-relaxed"
+  }, ev.summary)), React.createElement("div", {
+    className: "flex-shrink-0 ink-3 text-sm"
+  }, expanded ? '−' : '+')), expanded && React.createElement("div", {
+    className: "px-4 pb-4 pt-1 ml-[52px] text-[12px] ink-2 leading-relaxed font-serif"
+  }, React.createElement("div", {
+    className: "border-l-2 border-amber-500/30 pl-4"
+  }, ev.detail)));
+};
+const PositionalScatterChart = () => {
+  const scatterData = MODULES.map(m => ({
+    pos: m.pos,
+    rate: m.rate,
+    health: m.health,
+    id: m.id,
+    tier: m.tier,
+    fill: m.tier === 1 ? '#E25C5C' : m.tier === 2 ? '#D9A741' : m.tier === 'M17' ? '#4FBCE6' : '#5FCB8C'
+  }));
+  const regressionLine = [{
+    pos: 1,
+    rate: 9.8
+  }, {
+    pos: 20,
+    rate: 1.0
+  }];
+  return React.createElement(ResponsiveContainer, {
+    width: "100%",
+    height: 260
+  }, React.createElement(ScatterChart, {
+    margin: {
+      top: 12,
+      right: 24,
+      left: 4,
+      bottom: 20
+    }
+  }, React.createElement(CartesianGrid, {
+    stroke: chartTheme().grid,
+    strokeDasharray: "2 4"
+  }), React.createElement(XAxis, {
+    type: "number",
+    dataKey: "pos",
+    name: "Header position",
+    domain: [0.5, 20.5],
+    ticks: [1, 5, 10, 15, 20],
+    stroke: chartTheme().tick,
+    tick: {
+      fontSize: 10,
+      fill: chartTheme().tick
+    },
+    tickLine: false,
+    label: {
+      value: 'Header position (1 = inlet, 20 = outlet)',
+      position: 'insideBottom',
+      offset: -8,
+      fontSize: 11,
+      fill: chartTheme().tickLabel
+    }
+  }), React.createElement(YAxis, {
+    type: "number",
+    dataKey: "rate",
+    name: "Rise rate",
+    domain: [0, 14],
+    stroke: chartTheme().tick,
+    tick: {
+      fontSize: 10,
+      fill: chartTheme().tick
+    },
+    tickLine: false,
+    label: {
+      value: 'Cell voltage rise rate (mV/day)',
+      angle: -90,
+      position: 'insideLeft',
+      fontSize: 11,
+      fill: chartTheme().tickLabel
+    }
+  }), React.createElement(ReferenceLine, {
+    y: 2,
+    stroke: "#5FCB8C",
+    strokeDasharray: "3 3",
+    label: {
+      value: 'Normal <2 mV/day',
+      fontSize: 10,
+      fill: '#5FCB8C',
+      position: 'right'
+    }
+  }), React.createElement(Line, {
+    data: regressionLine,
+    type: "linear",
+    dataKey: "rate",
+    stroke: chartTheme().tick,
+    strokeWidth: 1,
+    strokeDasharray: "4 4",
+    dot: false
+  }), React.createElement(Tooltip, {
+    contentStyle: {
+      background: chartTheme().tooltipBg,
+      border: '1px solid ' + chartTheme().tooltipBorder,
+      borderRadius: 4,
+      fontSize: 11
+    },
+    formatter: (v, n, p) => [`+${p.payload.rate} mV/d`, `Module ${p.payload.id}`],
+    labelFormatter: () => '',
+    cursor: {
+      stroke: '#243446',
+      strokeWidth: 1,
+      strokeDasharray: '2 2'
+    }
+  }), React.createElement(Scatter, {
+    data: scatterData,
+    fill: "#D9A741"
+  }, scatterData.map((d, i) => React.createElement(Cell, {
+    key: i,
+    fill: d.fill,
+    stroke: d.tier === 'M17' ? '#4FBCE6' : 'none',
+    strokeWidth: d.tier === 'M17' ? 2 : 0,
+    r: d.tier === 'M17' ? 7 : 6
+  })))));
+};
+const RPDiagnosisTab = () => {
+  const [expanded, setExpanded] = useState(new Set([1]));
+  const toggle = n => {
+    const next = new Set(expanded);
+    next.has(n) ? next.delete(n) : next.add(n);
+    setExpanded(next);
+  };
+  return React.createElement("div", {
+    className: "tab-fade"
+  }, React.createElement(Panel, {
+    title: "Root Cause Conclusion",
+    subtitle: "Five independent evidence sources converge on a single cause. Cause: \u20AC50K deferred maintenance. Consequence: up to \u20AC4.5M downstream damage. Ratio: 22:1.",
+    accent: "amber",
+    className: "mb-5"
+  }, React.createElement("div", {
+    className: "p-5"
+  }, React.createElement("div", {
+    className: "grid grid-cols-12 gap-4 items-start"
+  }, React.createElement("div", {
+    className: "col-span-12 lg:col-span-8"
+  }, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-amber-300 font-bold mb-1.5"
+  }, "Mechanism"), React.createElement("div", {
+    className: "font-serif italic text-[14px] leading-relaxed ink-2 mb-3"
+  }, "Resin exhaustion \u2192 iron breakthrough at 85 ppb (4.25\xD7 OEM limit) \u2192 PEM catalyst poisoning (4\u20136\xD7 acceleration factor) \u2192 cascading degradation across 20 modules on shared header."), React.createElement("div", {
+    className: "grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3"
+  }, React.createElement("div", {
+    className: "panel-2 rounded p-2.5"
+  }, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold"
+  }, "Affected"), React.createElement("div", {
+    className: "num text-base font-bold"
+  }, "20 / 20 modules")), React.createElement("div", {
+    className: "panel-2 rounded p-2.5"
+  }, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold"
+  }, "Tier 1 damage"), React.createElement("div", {
+    className: "num text-base font-bold text-red-400"
+  }, "irreversible")), React.createElement("div", {
+    className: "panel-2 rounded p-2.5"
+  }, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold"
+  }, "Root WO"), React.createElement("div", {
+    className: "num text-base font-bold text-amber-300"
+  }, "WO-2025-04412")), React.createElement("div", {
+    className: "panel-2 rounded p-2.5"
+  }, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold"
+  }, "Confidence"), React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, React.createElement("div", {
+    className: "num text-base font-bold text-emerald-400"
+  }, "97%"), React.createElement(ConfidenceMeter, {
+    value: 97,
+    label: false
+  }))))), React.createElement("div", {
+    className: "col-span-12 lg:col-span-4 lg:border-l divider lg:pl-5"
+  }, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider ink-3 font-semibold mb-2"
+  }, "Damage estimate vs cause"), React.createElement("div", {
+    className: "space-y-1.5"
+  }, React.createElement("div", {
+    className: "flex justify-between text-[12px]"
+  }, React.createElement("span", {
+    className: "ink-2"
+  }, "Tier 1 replacement (\xD74)"), React.createElement("span", {
+    className: "num font-semibold"
+  }, "\u20AC2.80M")), React.createElement("div", {
+    className: "flex justify-between text-[12px]"
+  }, React.createElement("span", {
+    className: "ink-2"
+  }, "Tier 2 worst-case"), React.createElement("span", {
+    className: "num font-semibold"
+  }, "\u20AC1.35M")), React.createElement("div", {
+    className: "flex justify-between text-[12px]"
+  }, React.createElement("span", {
+    className: "ink-2"
+  }, "Module 17 refurbishment"), React.createElement("span", {
+    className: "num font-semibold"
+  }, "\u20AC0.45M")), React.createElement("div", {
+    className: "flex justify-between text-[12px] pt-1.5 border-t divider"
+  }, React.createElement("span", {
+    className: "text-red-400 font-semibold"
+  }, "Worst-case consequence"), React.createElement("span", {
+    className: "num font-bold text-red-400"
+  }, "\u20AC4.60M")), React.createElement("div", {
+    className: "flex justify-between text-[12px]"
+  }, React.createElement("span", {
+    className: "ink-2"
+  }, "Cause (deferred PM)"), React.createElement("span", {
+    className: "num font-semibold"
+  }, "\u20AC0.05M")), React.createElement("div", {
+    className: "flex justify-between text-[12px] pt-1.5 border-t divider"
+  }, React.createElement("span", {
+    className: "font-bold text-amber-300"
+  }, "Consequence ratio"), React.createElement("span", {
+    className: "num font-bold text-amber-300"
+  }, "22 : 1"))))))), React.createElement("div", {
+    className: "mb-5"
+  }, React.createElement("div", {
+    className: "flex items-center justify-between mb-3"
+  }, React.createElement("div", null, React.createElement("div", {
+    className: "text-[15px] font-bold tracking-tight"
+  }, "Evidence Chain"), React.createElement("div", {
+    className: "text-[11.5px] ink-3 font-serif italic"
+  }, "Each step builds on the last. Together they make the conclusion inescapable.")), React.createElement("div", {
+    className: "flex gap-2"
+  }, React.createElement("button", {
+    onClick: () => setExpanded(new Set([1, 2, 3, 4, 5])),
+    className: "text-[10.5px] tracking-wider font-semibold ink-2 hover:text-ink px-2.5 py-1 rounded border divider"
+  }, "EXPAND ALL"), React.createElement("button", {
+    onClick: () => setExpanded(new Set()),
+    className: "text-[10.5px] tracking-wider font-semibold ink-2 hover:text-ink px-2.5 py-1 rounded border divider"
+  }, "COLLAPSE ALL"))), React.createElement("div", {
+    className: "space-y-2.5"
+  }, EVIDENCE.map(ev => React.createElement(EvidenceCard, {
+    key: ev.n,
+    ev: ev,
+    expanded: expanded.has(ev.n),
+    onToggle: () => toggle(ev.n)
+  })))), React.createElement(Panel, {
+    title: "Evidence 2 \xB7 Positional Correlation",
+    subtitle: "X-axis: header position (inlet \u2192 outlet). Y-axis: cell voltage rise rate. Near-linear relationship. r=0.94 (Tier 1), r=0.89 (full fleet ex-M17). Module 17 is the outlier \u2014 aging damage increases its susceptibility to contamination.",
+    accent: "amber",
+    className: "mb-5"
+  }, React.createElement("div", {
+    className: "p-4"
+  }, React.createElement(PositionalScatterChart, null), React.createElement("div", {
+    className: "flex items-center justify-between mt-3 pt-3 border-t divider flex-wrap gap-3"
+  }, React.createElement("div", {
+    className: "flex items-center gap-4 text-[10.5px] ink-3 tracking-wider uppercase font-semibold"
+  }, React.createElement("span", {
+    className: "flex items-center gap-1.5"
+  }, React.createElement("span", {
+    className: "w-2.5 h-2.5 rounded-full",
+    style: {
+      background: '#E25C5C'
+    }
+  }), "Tier 1"), React.createElement("span", {
+    className: "flex items-center gap-1.5"
+  }, React.createElement("span", {
+    className: "w-2.5 h-2.5 rounded-full",
+    style: {
+      background: '#D9A741'
+    }
+  }), "Tier 2"), React.createElement("span", {
+    className: "flex items-center gap-1.5"
+  }, React.createElement("span", {
+    className: "w-2.5 h-2.5 rounded-full",
+    style: {
+      background: '#5FCB8C'
+    }
+  }), "Tier 3"), React.createElement("span", {
+    className: "flex items-center gap-1.5"
+  }, React.createElement("span", {
+    className: "w-2.5 h-2.5 rounded-full border-2",
+    style: {
+      background: '#4FBCE6',
+      borderColor: '#4FBCE6'
+    }
+  }), "M17 (dual)")), React.createElement("div", {
+    className: "flex items-center gap-5 text-[11px] num"
+  }, React.createElement("span", null, React.createElement("span", {
+    className: "ink-3"
+  }, "r (Tier 1)"), " ", React.createElement("span", {
+    className: "font-bold text-amber-300"
+  }, "0.94")), React.createElement("span", null, React.createElement("span", {
+    className: "ink-3"
+  }, "r (ex-M17)"), " ", React.createElement("span", {
+    className: "font-bold text-amber-300"
+  }, "0.89")), React.createElement("span", null, React.createElement("span", {
+    className: "ink-3"
+  }, "r (full)"), " ", React.createElement("span", {
+    className: "font-bold ink-2"
+  }, "0.82")))))), React.createElement(Panel, {
+    title: "Evidence 4 \xB7 Deferred Work Order Timeline",
+    subtitle: "WO-2025-04412 (DI resin replacement, \u20AC50K) was deferred 9 months ago due to a supply chain delay. Contamination onset is the same day as the deferral push beyond service life.",
+    accent: "amber"
+  }, React.createElement("div", {
+    className: "p-5"
+  }, React.createElement("div", {
+    className: "relative"
+  }, React.createElement("div", {
+    className: "absolute left-0 right-0 top-1/2 h-px",
+    style: {
+      background: 'linear-gradient(90deg, var(--line) 0%, var(--line-2) 50%, var(--line) 100%)'
+    }
+  }), React.createElement("div", {
+    className: "grid grid-cols-6 gap-2 relative"
+  }, [{
+    day: '−270',
+    label: 'WO Created',
+    detail: 'PM schedule trigger',
+    color: 'cyan'
+  }, {
+    day: '−180',
+    label: 'Scheduled',
+    detail: 'Procurement initiated',
+    color: 'cyan'
+  }, {
+    day: '−150',
+    label: 'DEFERRED',
+    detail: 'Supply chain · no downstream impact assessment',
+    color: 'red',
+    emphasis: true
+  }, {
+    day: '−70',
+    label: 'Contamination onset',
+    detail: 'Water quality begins deteriorating',
+    color: 'red',
+    emphasis: true
+  }, {
+    day: '−3',
+    label: 'Resin arrives',
+    detail: '2 pallets Purolite NRW37',
+    color: 'amber'
+  }, {
+    day: '0',
+    label: 'Today',
+    detail: 'WO still Deferred · diagnosis complete',
+    color: 'amber'
+  }].map((s, i) => React.createElement("div", {
+    key: i,
+    className: "relative"
+  }, React.createElement("div", {
+    className: `w-2.5 h-2.5 rounded-full mx-auto mb-3 relative z-10 ${s.emphasis ? 'pulse-dot' : ''}`,
+    style: {
+      background: s.color === 'red' ? '#E25C5C' : s.color === 'amber' ? '#D9A741' : '#4FBCE6',
+      boxShadow: s.emphasis ? `0 0 0 4px rgba(226,92,92,0.15)` : 'none'
+    }
+  }), React.createElement("div", {
+    className: `text-center ${s.emphasis ? 'panel-2 rounded p-2 -mt-1' : ''}`,
+    style: s.emphasis ? {
+      borderColor: 'rgba(226,92,92,0.4)'
+    } : {}
+  }, React.createElement("div", {
+    className: `text-[10px] num tracking-wider font-bold ${s.color === 'red' ? 'text-red-400' : s.color === 'amber' ? 'text-amber-300' : 'text-cyan-300'}`
+  }, "DAY ", s.day), React.createElement("div", {
+    className: `text-[11.5px] font-semibold mt-0.5 ${s.emphasis ? 'text-red-300' : 'text-ink'}`
+  }, s.label), React.createElement("div", {
+    className: "text-[10px] ink-3 mt-0.5 leading-tight"
+  }, s.detail)))))), React.createElement("div", {
+    className: "mt-5 p-3 rounded",
+    style: {
+      background: 'rgba(217,167,65,0.06)',
+      border: '1px solid rgba(217,167,65,0.25)'
+    }
+  }, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-amber-300 font-bold mb-1"
+  }, "Resolve Predict reasoning"), React.createElement("div", {
+    className: "text-[12px] ink-2 font-serif italic leading-relaxed"
+  }, "\"WO-2025-04412 was deferred on Day \u2212150. Water quality began deteriorating on Day \u221270. The 80-day lag aligns with the documented service life of the resin beds from the deferred scheduled completion date. The temporal alignment combined with the causal mechanism (resin exhaustion \u2192 iron breakthrough \u2192 membrane poisoning) establishes the deferred maintenance as the root cause with 97% confidence.\"")))));
+};
+const RPAssessmentTab = () => {
+  const [sortBy, setSortBy] = useState('d90');
+  const [sortDir, setSortDir] = useState('desc');
+  const rows = useMemo(() => {
+    const data = MODULES.map(m => ({
+      ...m,
+      ...PoF[m.id]
+    }));
+    data.sort((a, b) => {
+      let av = a[sortBy],
+        bv = b[sortBy];
+      if (sortBy === 'cof') {
+        const map = {
+          'Severe': 5,
+          'Major': 4,
+          'Moderate': 3,
+          'Low': 2,
+          'Negligible': 1
+        };
+        av = map[a.cof] || 0;
+        bv = map[b.cof] || 0;
+      }
+      if (typeof av === 'string') av = av.toLowerCase();
+      if (typeof bv === 'string') bv = bv.toLowerCase();
+      return sortDir === 'asc' ? av > bv ? 1 : -1 : av < bv ? 1 : -1;
+    });
+    return data;
+  }, [sortBy, sortDir]);
+  const onSort = key => {
+    if (sortBy === key) setSortDir(sortDir === 'asc' ? 'desc' : 'asc');else {
+      setSortBy(key);
+      setSortDir('desc');
+    }
+  };
+  const Th = ({
+    k,
+    children,
+    num
+  }) => React.createElement("th", {
+    onClick: () => onSort(k),
+    className: `px-3 py-2 text-[10px] uppercase tracking-wider ink-3 font-semibold cursor-pointer hover:text-ink ${num ? 'text-right' : 'text-left'} select-none`
+  }, React.createElement("span", {
+    className: "inline-flex items-center gap-1"
+  }, children, " ", sortBy === k && React.createElement("span", {
+    className: "text-amber-300"
+  }, sortDir === 'asc' ? '↑' : '↓')));
+  return React.createElement("div", {
+    className: "tab-fade"
+  }, React.createElement(Panel, {
+    title: "Fleet Assessment Table",
+    subtitle: "Per-asset probability of failure at three horizons, consequence of failure across five dimensions (worst dim shown), and Resolve Predict's confidence in the assessment.",
+    accent: "amber",
+    className: "mb-5"
+  }, React.createElement("div", {
+    className: "overflow-x-auto"
+  }, React.createElement("table", {
+    className: "w-full text-[12px] tbl-tight"
+  }, React.createElement("thead", {
+    className: "border-b divider"
+  }, React.createElement("tr", null, React.createElement(Th, {
+    k: "id"
+  }, "Module"), React.createElement(Th, {
+    k: "pos"
+  }, "Pos"), React.createElement(Th, {
+    k: "tier"
+  }, "Tier"), React.createElement(Th, {
+    k: "health",
+    num: true
+  }, "Health"), React.createElement(Th, {
+    k: "d30",
+    num: true
+  }, "PoF 30d"), React.createElement(Th, {
+    k: "d90",
+    num: true
+  }, "PoF 90d"), React.createElement(Th, {
+    k: "d365",
+    num: true
+  }, "PoF 365d"), React.createElement(Th, {
+    k: "cof"
+  }, "CoF"), React.createElement(Th, {
+    k: "conf"
+  }, "Confidence"), React.createElement(Th, {
+    k: "recommendation"
+  }, "Recommendation"))), React.createElement("tbody", null, rows.map(r => {
+    const meta = tierMeta(r.tier);
+    const isReplace = r.recommendation === 'REPLACE';
+    const isRefurb = r.recommendation === 'REFURBISH';
+    return React.createElement("tr", {
+      key: r.id,
+      className: "border-b border-white/[0.04] hover:bg-white/[0.02]"
+    }, React.createElement("td", {
+      className: "px-3 py-2 num font-semibold"
+    }, "M", String(r.id).padStart(2, '0')), React.createElement("td", {
+      className: "px-3 py-2 num ink-2"
+    }, r.pos), React.createElement("td", {
+      className: "px-3 py-2"
+    }, React.createElement(Pill, {
+      color: r.tier === 1 ? 'red' : r.tier === 2 ? 'amber' : r.tier === 'M17' ? 'cyan' : 'emerald'
+    }, meta.label)), React.createElement("td", {
+      className: "px-3 py-2 num text-right font-semibold",
+      style: {
+        color: healthColor(r.health)
+      }
+    }, r.health), React.createElement("td", {
+      className: "px-3 py-2 num text-right"
+    }, r.d30, "%"), React.createElement("td", {
+      className: `px-3 py-2 num text-right font-semibold ${r.d90 >= 50 ? 'text-red-400' : r.d90 >= 20 ? 'text-amber-300' : 'ink-2'}`
+    }, r.d90, "%"), React.createElement("td", {
+      className: `px-3 py-2 num text-right ${r.d365 >= 50 ? 'text-red-400' : r.d365 >= 20 ? 'text-amber-300' : 'ink-2'}`
+    }, r.d365, "%"), React.createElement("td", {
+      className: "px-3 py-2"
+    }, React.createElement("span", {
+      className: `text-[11px] font-semibold ${r.cof === 'Severe' ? 'text-red-400' : r.cof === 'Major' ? 'text-red-300' : r.cof === 'Moderate' ? 'text-amber-300' : 'ink-2'}`
+    }, r.cof)), React.createElement("td", {
+      className: "px-3 py-2"
+    }, React.createElement(ConfidenceMeter, {
+      value: r.conf
+    })), React.createElement("td", {
+      className: "px-3 py-2"
+    }, React.createElement("span", {
+      className: `text-[11px] font-bold tracking-wide ${isReplace ? 'text-red-400' : isRefurb ? 'text-cyan-300' : r.recommendation === 'MONITOR' ? 'text-emerald-400' : 'ink-2'}`
+    }, r.recommendation), r.special && React.createElement("div", {
+      className: "text-[10px] ink-3 font-serif italic mt-0.5"
+    }, r.special)));
+  })))), React.createElement("div", {
+    className: "grid grid-cols-2 lg:grid-cols-4 gap-3 p-4 border-t divider"
+  }, React.createElement("div", {
+    className: "panel-2 rounded p-3 border-l-2 border-red-500"
+  }, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold"
+  }, "Tier 1 \xB7 Replace"), React.createElement("div", {
+    className: "num text-xl font-bold mt-1 text-red-400"
+  }, "\u20AC2.80M"), React.createElement("div", {
+    className: "text-[10.5px] ink-3 mt-0.5"
+  }, "4 modules \xB7 90\u201394% conf")), React.createElement("div", {
+    className: "panel-2 rounded p-3 border-l-2 border-amber-500"
+  }, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold"
+  }, "Tier 2 \xB7 Worst case"), React.createElement("div", {
+    className: "num text-xl font-bold mt-1 text-amber-300"
+  }, "\u20AC1.35M"), React.createElement("div", {
+    className: "text-[10.5px] ink-3 mt-0.5"
+  }, "7 modules \xB7 66\u201374% conf")), React.createElement("div", {
+    className: "panel-2 rounded p-3 border-l-2 border-cyan-500"
+  }, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold"
+  }, "M17 \xB7 Refurbish"), React.createElement("div", {
+    className: "num text-xl font-bold mt-1 text-cyan-300"
+  }, "\u20AC0.45M"), React.createElement("div", {
+    className: "text-[10.5px] ink-3 mt-0.5"
+  }, "1 module \xB7 88% conf")), React.createElement("div", {
+    className: "panel-2 rounded p-3 border-l-2 border-emerald-500"
+  }, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold"
+  }, "Tier 3 \xB7 Monitor"), React.createElement("div", {
+    className: "num text-xl font-bold mt-1 text-emerald-400"
+  }, "\u20AC0"), React.createElement("div", {
+    className: "text-[10.5px] ink-3 mt-0.5"
+  }, "8 modules \xB7 85% conf")))), React.createElement(Panel, {
+    title: "How the Confidence Score Drives Routing",
+    subtitle: "The score is not decorative. It determines which lane an action takes.",
+    accent: "amber"
+  }, React.createElement("div", {
+    className: "p-5 grid grid-cols-1 lg:grid-cols-3 gap-4"
+  }, [{
+    tier: 'HIGH',
+    range: '85%+',
+    color: 'red',
+    title: 'Lane 1 · Emergency O&M',
+    body: 'AI is certain about the diagnosis and the urgency. Direct to IFS Cloud EAM. No capital approval needed. PSO assigns crews immediately.',
+    icon: '⚡'
+  }, {
+    tier: 'HIGH',
+    range: '85%+',
+    color: 'amber',
+    title: 'Lane 2 · Through Copperleaf',
+    body: 'AI is certain about the need. Copperleaf optimizes timing and sequencing against budget envelope, outage windows, and competing investments.',
+    icon: '◈'
+  }, {
+    tier: 'LOWER',
+    range: '65–75%',
+    color: 'violet',
+    title: 'Lane 3 · Conditional Scenarios',
+    body: 'AI is honest about uncertainty — outcome depends on monitoring data that does not exist yet. Copperleaf holds contingent budget. No work orders created.',
+    icon: '◊'
+  }].map((c, i) => React.createElement("div", {
+    key: i,
+    className: `panel-2 rounded p-4 ${c.color === 'red' ? 'bg-lane-1' : c.color === 'amber' ? 'bg-lane-2' : 'bg-lane-3'}`
+  }, React.createElement("div", {
+    className: "flex items-center gap-2 mb-2"
+  }, React.createElement("div", {
+    className: "w-8 h-8 rounded grid place-items-center text-base font-bold",
+    style: {
+      background: 'rgba(255,255,255,0.05)'
+    }
+  }, c.icon), React.createElement("div", null, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold"
+  }, c.tier, " CONFIDENCE \xB7 ", c.range), React.createElement("div", {
+    className: `text-[13px] font-bold ${c.color === 'red' ? 'text-red-400' : c.color === 'amber' ? 'text-amber-300' : 'text-violet-300'}`
+  }, c.title))), React.createElement("div", {
+    className: "text-[11.5px] ink-2 font-serif italic leading-relaxed"
+  }, c.body))))));
+};
+const LaneTotal = ({
+  lane,
+  label,
+  total,
+  count,
+  sub,
+  color
+}) => {
+  const colorMap = {
+    red: {
+      text: 'text-red-400',
+      bg: 'bg-lane-1',
+      border: 'border-red-500'
+    },
+    amber: {
+      text: 'text-amber-300',
+      bg: 'bg-lane-2',
+      border: 'border-amber-500'
+    },
+    violet: {
+      text: 'text-violet-300',
+      bg: 'bg-lane-3',
+      border: 'border-violet-500'
+    }
+  };
+  const c = colorMap[color];
+  return React.createElement("div", {
+    className: `panel-2 rounded p-4 border-l-[3px] ${c.border} ${c.bg}`
+  }, React.createElement("div", {
+    className: "flex items-baseline justify-between gap-2 mb-1"
+  }, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider font-bold ink-3"
+  }, "LANE ", lane), React.createElement("div", {
+    className: "text-[10.5px] ink-3 num"
+  }, count, " action", count !== 1 ? 's' : '')), React.createElement("div", {
+    className: `text-[13px] font-bold ${c.text} mb-0.5`
+  }, label), React.createElement("div", {
+    className: `num text-2xl font-bold ${c.text}`
+  }, total), React.createElement("div", {
+    className: "text-[10.5px] ink-3 font-serif italic mt-1.5"
+  }, sub));
+};
+const ActionsTab = ({
+  onJumpToLane,
+  onSelectAction
+}) => {
+  const lane1 = ACTIONS.filter(a => a.lane === 1);
+  const lane2 = ACTIONS.filter(a => a.lane === 2);
+  const lane3 = ACTIONS.filter(a => a.lane === 3);
+  const lane1Total = lane1.reduce((s, a) => s + a.cost, 0);
+  const lane2Total = lane2.reduce((s, a) => s + a.cost, 0);
+  const lane3Total = lane3.reduce((s, a) => s + a.cost, 0);
+  return React.createElement("div", {
+    className: "tab-fade"
+  }, React.createElement("div", {
+    className: "grid grid-cols-1 md:grid-cols-3 gap-3 mb-5"
+  }, React.createElement(LaneTotal, {
+    lane: 1,
+    label: "DIRECT TO IFS CLOUD EAM",
+    color: "red",
+    total: formatCurrency(lane1Total),
+    count: lane1.length,
+    sub: "Emergency \xB7 operational \xB7 within maintenance authority"
+  }), React.createElement(LaneTotal, {
+    lane: 2,
+    label: "THROUGH COPPERLEAF",
+    color: "amber",
+    total: formatCurrency(lane2Total),
+    count: lane2.length,
+    sub: "Capital investments \xB7 portfolio optimization"
+  }), React.createElement(LaneTotal, {
+    lane: 3,
+    label: "COPPERLEAF CONDITIONAL",
+    color: "violet",
+    total: `${formatCurrency(lane3Total)}*`,
+    count: lane3.length,
+    sub: "*Conditional \xB7 no WO created \xB7 awaiting monitoring data"
+  })), React.createElement(Panel, {
+    title: "Recommended Actions with Routing",
+    subtitle: "The bridge from diagnosis to execution. Click any row for full prescriptive detail. The destination column shows which downstream system receives each action \u2014 high confidence + urgent \u2192 Lane 1; high confidence + capital \u2192 Lane 2; lower confidence \u2192 Lane 3.",
+    accent: "amber",
+    className: "mb-5"
+  }, React.createElement("div", {
+    className: "overflow-x-auto"
+  }, React.createElement("table", {
+    className: "w-full text-[12px] tbl-tight"
+  }, React.createElement("thead", {
+    className: "border-b divider"
+  }, React.createElement("tr", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold text-left"
+  }, React.createElement("th", {
+    className: "px-3 py-2"
+  }, "ID"), React.createElement("th", {
+    className: "px-3 py-2"
+  }, "Action"), React.createElement("th", {
+    className: "px-3 py-2"
+  }, "Lane"), React.createElement("th", {
+    className: "px-3 py-2 text-right"
+  }, "Cost"), React.createElement("th", {
+    className: "px-3 py-2"
+  }, "PoF"), React.createElement("th", {
+    className: "px-3 py-2"
+  }, "CoF"), React.createElement("th", {
+    className: "px-3 py-2"
+  }, "Confidence"), React.createElement("th", {
+    className: "px-3 py-2"
+  }, "Destination"))), React.createElement("tbody", null, ACTIONS.map(a => React.createElement("tr", {
+    key: a.id,
+    onClick: () => onSelectAction(a),
+    className: "border-b border-white/[0.04] hover:bg-white/[0.03] cursor-pointer"
+  }, React.createElement("td", {
+    className: "px-3 py-2.5 num font-bold text-amber-300"
+  }, a.id), React.createElement("td", {
+    className: "px-3 py-2.5"
+  }, React.createElement("div", {
+    className: "font-semibold"
+  }, a.title), React.createElement("div", {
+    className: "text-[10.5px] ink-3 num"
+  }, a.asset)), React.createElement("td", {
+    className: "px-3 py-2.5"
+  }, React.createElement(Pill, {
+    color: a.lane === 1 ? 'red' : a.lane === 2 ? 'amber' : 'violet'
+  }, "LANE ", a.lane)), React.createElement("td", {
+    className: "px-3 py-2.5 num text-right font-semibold"
+  }, a.costLabel), React.createElement("td", {
+    className: "px-3 py-2.5 num ink-2"
+  }, a.pof), React.createElement("td", {
+    className: "px-3 py-2.5"
+  }, React.createElement("span", {
+    className: `text-[11px] font-semibold ${a.cof === 'Severe' ? 'text-red-400' : a.cof === 'Major' ? 'text-red-300' : a.cof === 'Moderate' ? 'text-amber-300' : 'ink-2'}`
+  }, a.cof)), React.createElement("td", {
+    className: "px-3 py-2.5"
+  }, React.createElement(ConfidenceMeter, {
+    value: a.confidence
+  })), React.createElement("td", {
+    className: "px-3 py-2.5 ink-2 text-[11px]"
+  }, React.createElement("div", {
+    className: "flex items-center gap-1.5"
+  }, React.createElement("span", null, a.destination), React.createElement("span", {
+    className: "text-ink-4"
+  }, "\u203A")))))))), React.createElement("div", {
+    className: "p-4 border-t divider bg-white/[0.01]"
+  }, React.createElement("div", {
+    className: "text-[11.5px] ink-2 font-serif italic leading-relaxed"
+  }, React.createElement("span", {
+    className: "not-italic font-sans text-amber-300 font-semibold tracking-wide"
+  }, "The routing logic is visible in the table."), " High-confidence emergency items skip the capital queue. High-confidence capital items go through Copperleaf for optimization. Lower-confidence items wait for data \u2014 Copperleaf holds the budget but creates no work orders until the confidence rises."))), React.createElement("div", {
+    className: "grid grid-cols-1 md:grid-cols-3 gap-3"
+  }, React.createElement("button", {
+    onClick: () => onJumpToLane('ifs'),
+    className: "panel rounded p-4 text-left hover:border-red-500/40 transition-all group",
+    style: {
+      borderLeft: '3px solid var(--red)'
+    }
+  }, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-red-400 font-bold mb-1"
+  }, "FOLLOW LANE 1 \u2192"), React.createElement("div", {
+    className: "text-[13px] font-bold mb-0.5"
+  }, "Open in IFS Cloud"), React.createElement("div", {
+    className: "text-[11px] ink-3 font-serif italic"
+  }, "See PSO assign Marco Ricci to WO-2026-01187")), React.createElement("button", {
+    onClick: () => onJumpToLane('copperleaf'),
+    className: "panel rounded p-4 text-left hover:border-amber-500/40 transition-all",
+    style: {
+      borderLeft: '3px solid var(--amber)'
+    }
+  }, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-amber-300 font-bold mb-1"
+  }, "FOLLOW LANE 2 \u2192"), React.createElement("div", {
+    className: "text-[13px] font-bold mb-0.5"
+  }, "Open in Copperleaf"), React.createElement("div", {
+    className: "text-[11px] ink-3 font-serif italic"
+  }, "See the capital plan reoptimize live")), React.createElement("button", {
+    onClick: () => onJumpToLane('copperleaf'),
+    className: "panel rounded p-4 text-left hover:border-violet-500/40 transition-all",
+    style: {
+      borderLeft: '3px solid var(--violet)'
+    }
+  }, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-violet-300 font-bold mb-1"
+  }, "FOLLOW LANE 3 \u2192"), React.createElement("div", {
+    className: "text-[13px] font-bold mb-0.5"
+  }, "Conditional Budget in Copperleaf"), React.createElement("div", {
+    className: "text-[11px] ink-3 font-serif italic"
+  }, "\u20AC1.35M held \xB7 no WO created \xB7 awaits Day 60"))));
+};
+const ActionDrawer = ({
+  action,
+  onClose
+}) => {
+  if (!action) return null;
+  const renderBody = () => {
+    switch (action.id) {
+      case 'A1':
+        return React.createElement(Fragment, null, React.createElement(KV, {
+          k: "Asset IDs",
+          v: "GH01-WAT-01-002 (V-201A), GH01-WAT-01-003 (V-201B)",
+          mono: true
+        }), React.createElement(KV, {
+          k: "Estimated Duration",
+          v: "6\u20138 hrs per vessel \xB7 single shift if crewing allows"
+        }), React.createElement(SectionHead, null, "Why Now"), React.createElement(Bdy, null, "Iron breakthrough active at 85 ppb (OEM threshold 20 ppb, 4.25\xD7 exceedance). DI resistivity dropped from 16 to 0.4 M\u03A9\xB7cm. ", React.createElement("b", {
+          className: "text-red-300"
+        }, "Every hour of continued operation adds incremental contamination damage to 16 recoverable modules."), " Tier 1 (M1\u20134) damage already irreversible \u2014 urgency is protecting the remaining fleet."), React.createElement(Bdy, null, React.createElement("span", {
+          className: "font-bold text-amber-300"
+        }, "Delay cost estimate:"), " \u20AC15K\u2013\u20AC25K in additional membrane damage ", React.createElement("i", null, "per day"), " of continued operation."), React.createElement(SectionHead, null, "What to Do"), React.createElement("ol", {
+          className: "text-[12px] ink-2 space-y-1 list-decimal list-inside leading-relaxed"
+        }, React.createElement("li", null, "Isolate and drain V-201A. Remove spent resin. Inspect internals for channeling/bypass. Photograph spent resin condition."), React.createElement("li", null, "Load Purolite NRW37 nuclear-grade mixed bed (or equivalent: resistivity >15 M\u03A9\xB7cm, iron <1 ppb outlet)."), React.createElement("li", null, "Close, pressure-test, return V-201A to service."), React.createElement("li", null, "Repeat for V-201B."), React.createElement("li", null, "Verify outlet water quality ", React.createElement("i", null, "before"), " reconnecting to electrolyzer header.")), React.createElement(SectionHead, null, "Success Criteria"), React.createElement("ul", {
+          className: "text-[12px] ink-2 space-y-1 list-disc list-inside leading-relaxed"
+        }, React.createElement("li", null, "Outlet resistivity ", React.createElement("span", {
+          className: "num font-semibold"
+        }, ">15 M\u03A9\xB7cm"), " (target)"), React.createElement("li", null, "Outlet iron ", React.createElement("span", {
+          className: "num font-semibold"
+        }, "<5 ppb"), " (target)"), React.createElement("li", null, "Vessel \u0394P returns to baseline 0.2\u20130.4 bar"), React.createElement("li", null, "Water quality readings entered to PI tags WAT.DI.Resistivity, WAT.DI.IronConc")), React.createElement(SectionHead, null, "Inspection Guidance"), React.createElement(Bdy, {
+          className: "font-serif italic"
+        }, "During resin removal, inspect internals for channeling or bypass flow indicating vessel damage. Photograph spent resin color \u2014 ", React.createElement("b", {
+          className: "text-amber-300 not-italic"
+        }, "dark brown or black = heavy iron loading"), " consistent with this diagnosis. Normal spent resin is amber."), React.createElement(SectionHead, null, "What to Look For After"), React.createElement(Bdy, null, "Once water quality is restored, Resolve Predict begins tracking whether fleet degradation rates decelerate. ", React.createElement("i", null, "This is the data that determines Tier 2 outcomes."), " Expect cell voltage rise rates to drop within 7\u201314 days for Tier 2/3 modules. Tier 1 will not respond."));
+      case 'A3':
+        return React.createElement(Fragment, null, React.createElement(KV, {
+          k: "Asset IDs",
+          v: "GH01-ELZ-01-001, 002, 003, 004",
+          mono: true
+        }), React.createElement(KV, {
+          k: "Estimated Cost",
+          v: "\u20AC700K per module \xD7 4 = \u20AC2.8M"
+        }), React.createElement(SectionHead, null, "Why Replacement, Not Refurbishment"), React.createElement(Bdy, null, "Contamination damage to Tier 1 membranes is ", React.createElement("b", {
+          className: "text-red-300"
+        }, "irreversible"), ". Cell voltage rise rates of 8\u201312 mV/day indicate self-reinforcing catalyst poisoning \u2014 iron has permanently degraded the catalyst layer. Fixing water will stop additional damage but cannot reverse what's done. ", React.createElement("i", null, "Only effective intervention: full stack replacement.")), React.createElement(SectionHead, null, "Sequencing Recommendation"), React.createElement("div", {
+          className: "space-y-2 mt-2"
+        }, React.createElement(SequenceRow, {
+          days: "Day 1\u20133",
+          pair: "Modules 3 and 1 in parallel",
+          why: "Worst condition first \u2014 M3 has highest PoF (85% @ 90d)"
+        }), React.createElement(SequenceRow, {
+          days: "Day 4\u20136",
+          pair: "Modules 2 and 4 in parallel",
+          why: "Complete Tier 1 outage in 6 days vs 12 sequential"
+        })), React.createElement(Bdy, {
+          className: "mt-3"
+        }, React.createElement("span", {
+          className: "font-bold text-amber-300"
+        }, "Rationale:"), " Parallel pairs reduce total outage from 12 days to 6 days. Requires two qualified crews operating simultaneously."), React.createElement(SectionHead, null, "Prerequisite"), React.createElement(Bdy, {
+          className: "font-serif italic"
+        }, React.createElement("b", {
+          className: "not-italic font-sans text-red-300"
+        }, "Water system must be repaired BEFORE stack replacement begins."), " Replacing stacks into contaminated water would immediately begin degrading the new membranes. The Lane 1 emergency resin replacement must be confirmed complete with water quality verified before this work order is released."), React.createElement(SectionHead, null, "Copperleaf Decision Inputs"), React.createElement("div", {
+          className: "grid grid-cols-2 gap-3 mt-2"
+        }, React.createElement(KV, {
+          k: "PoF (90d)",
+          v: "70\u201385%",
+          mono: true
+        }), React.createElement(KV, {
+          k: "CoF",
+          v: "Major (4 correlated \xB7 20% capacity loss)"
+        }), React.createElement(KV, {
+          k: "Confidence",
+          v: "90\u201394%",
+          mono: true
+        }), React.createElement(KV, {
+          k: "Optimization scope",
+          v: "Q3 outage window \xB7 crew avail \xB7 lead time"
+        })));
+      case 'A4':
+        return React.createElement(Fragment, null, React.createElement(KV, {
+          k: "Asset ID",
+          v: "GH01-ELZ-01-017",
+          mono: true
+        }), React.createElement(KV, {
+          k: "Estimated Cost",
+          v: "\u20AC450K (refurbishment \u2014 vs \u20AC700K full replacement)"
+        }), React.createElement(SectionHead, null, "Why Refurbishment, Not Replacement"), React.createElement(Bdy, null, "Module 17's primary degradation mechanism is ", React.createElement("b", {
+          className: "text-cyan-300"
+        }, "normal aging at 54,000 hours"), ". Contamination is compounding the damage and accelerating the timeline, but the membrane is not irreversibly destroyed the way Tier 1 membranes are. Balance of plant components (flow fields, bipolar plates, gaskets) still within spec. Refurbishment \u2014 replacing the membrane-electrode assembly while retaining stack hardware \u2014 restores 20,000\u201330,000 hours of service at ", React.createElement("b", null, "64% of full replacement cost"), "."), React.createElement(SectionHead, null, "Timeline Impact of Contamination"), React.createElement(Bdy, null, "Without contamination: 6,000\u201326,000 hours of remaining life (6\u201324 months at current utilization). With contamination layered on, PoF has shifted from aging-only ~25% at 365 days to ", React.createElement("b", {
+          className: "text-amber-300"
+        }, "45% at 180 days"), ". The refurbishment timeline has compressed by ~6 months."), React.createElement(Bdy, {
+          className: "font-serif italic"
+        }, "This accelerated timeline is what makes bundling with the Q3 Tier 1 outage an optimization opportunity. The original aging-only plan would have scheduled Module 17 for Q1 next year \u2014 Copperleaf will pull it forward."), React.createElement(SectionHead, null, "Sequencing"), React.createElement(Bdy, null, "Concurrent with Tier 1 replacements during Q3 outage, using a separate ", React.createElement("span", {
+          className: "font-mono text-cyan-300"
+        }, "Crew C"), ". No impact on Tier 1 schedule."), React.createElement(SectionHead, null, "Copperleaf Decision Inputs"), React.createElement("div", {
+          className: "grid grid-cols-2 gap-3 mt-2"
+        }, React.createElement(KV, {
+          k: "PoF (30 / 90 / 365)",
+          v: "8% / 25% / 45%",
+          mono: true
+        }), React.createElement(KV, {
+          k: "CoF",
+          v: "Moderate (single module)"
+        }), React.createElement(KV, {
+          k: "Confidence",
+          v: "88%",
+          mono: true
+        }), React.createElement(KV, {
+          k: "Mechanism decomposition",
+          v: "Aging primary + contamination compounding"
+        })));
+      case 'A6':
+        return React.createElement(Fragment, null, React.createElement(KV, {
+          k: "Asset IDs",
+          v: "GH01-ELZ-01-005 through 011 (7 modules)",
+          mono: true
+        }), React.createElement(KV, {
+          k: "Conditional Budget",
+          v: "\u20AC450K \xD7 3 worst-case = \u20AC1.35M held"
+        }), React.createElement(SectionHead, null, "Why Not Act Now"), React.createElement(Bdy, null, "Confidence is ", React.createElement("b", {
+          className: "text-violet-300"
+        }, "68%"), ". The outcome depends on data that does not exist yet. These modules sustained moderate contamination damage but may recover once the water source is fixed. Probability of recovery: 60\u201370% for most modules."), React.createElement(Bdy, null, React.createElement("b", {
+          className: "text-amber-300"
+        }, "Acting now would mean committing \u20AC3.15M (7 \xD7 \u20AC450K) for refurbishments that may not be needed."), " The correct decision is to fix the root cause, monitor, and let the data decide."), React.createElement(SectionHead, null, "Monitoring Parameters (per module)"), React.createElement("ul", {
+          className: "text-[12px] ink-2 space-y-1 list-disc list-inside leading-relaxed"
+        }, React.createElement("li", null, React.createElement("b", {
+          className: "text-ink"
+        }, "Cell voltage rise rate"), " \xB7 currently 3\u20136 mV/day \xB7 recovery signal: <2 mV/day within 14 days"), React.createElement("li", null, React.createElement("b", {
+          className: "text-ink"
+        }, "Membrane resistance"), " \xB7 currently 15\u201345% above baseline \xB7 recovery: stabilizing or declining"), React.createElement("li", null, React.createElement("b", {
+          className: "text-ink"
+        }, "Current density efficiency"), " \xB7 currently 85\u201392% \xB7 recovery: >95%"), React.createElement("li", null, React.createElement("b", {
+          className: "text-ink"
+        }, "Stack temperature \u0394"), " \xB7 currently +3\u20138\xB0C \xB7 recovery: differential narrowing")), React.createElement(SectionHead, null, "Decision Framework at Day 60"), React.createElement("div", {
+          className: "space-y-2 mt-2"
+        }, React.createElement(DecisionRow, {
+          color: "emerald",
+          label: "If recovery confirmed",
+          detail: "Rise rate <2 mV/day AND resistance stable \u2192 confidence rises to 90%+. Copperleaf releases conditional budget."
+        }), React.createElement(DecisionRow, {
+          color: "amber",
+          label: "If non-recovery confirmed",
+          detail: "Rise rate >3 mV/day OR resistance still rising \u2192 confidence in refurb need rises to 85%+. Module graduates to Lane 2. WO created."
+        }), React.createElement(DecisionRow, {
+          color: "violet",
+          label: "If mixed signals",
+          detail: "Rate decreasing but slowly \u2192 extend monitoring to Day 90. Confidence in 75\u201385% range \u2014 more data needed."
+        })), React.createElement(SectionHead, null, "Expected Outcomes (Fleet Analysis)"), React.createElement("div", {
+          className: "space-y-1 text-[12px]"
+        }, React.createElement("div", {
+          className: "flex justify-between"
+        }, React.createElement("span", {
+          className: "ink-2"
+        }, "M5, M6, M7 ", React.createElement("span", {
+          className: "ink-3"
+        }, "(furthest from inlet)")), React.createElement("span", {
+          className: "text-emerald-400 font-semibold"
+        }, "70\u201380% recovery")), React.createElement("div", {
+          className: "flex justify-between"
+        }, React.createElement("span", {
+          className: "ink-2"
+        }, "M8, M9 ", React.createElement("span", {
+          className: "ink-3"
+        }, "(mid-header)")), React.createElement("span", {
+          className: "text-amber-300 font-semibold"
+        }, "50\u201360% recovery")), React.createElement("div", {
+          className: "flex justify-between"
+        }, React.createElement("span", {
+          className: "ink-2"
+        }, "M10, M11 ", React.createElement("span", {
+          className: "ink-3"
+        }, "(closer to inlet)")), React.createElement("span", {
+          className: "text-red-400 font-semibold"
+        }, "30\u201340% recovery"))));
+      default:
+        return React.createElement(Fragment, null, React.createElement(SectionHead, null, "Rationale"), React.createElement(Bdy, null, action.rationale), React.createElement(SectionHead, null, "Routing"), React.createElement(Bdy, null, action.laneDescription), React.createElement(KV, {
+          k: "Destination",
+          v: action.destination
+        }), React.createElement(KV, {
+          k: "Urgency",
+          v: action.urgency
+        }));
+    }
+  };
+  const SectionHead = ({
+    children
+  }) => React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-amber-300 font-bold mt-5 mb-1.5"
+  }, children);
+  const Bdy = ({
+    children,
+    className = ''
+  }) => React.createElement("div", {
+    className: `text-[12px] ink-2 leading-relaxed ${className}`
+  }, children);
+  const SequenceRow = ({
+    days,
+    pair,
+    why
+  }) => React.createElement("div", {
+    className: "panel-2 rounded p-2.5"
+  }, React.createElement("div", {
+    className: "flex items-baseline gap-3"
+  }, React.createElement("span", {
+    className: "num text-[11px] font-bold text-amber-300 tracking-wider"
+  }, days), React.createElement("span", {
+    className: "text-[12px] font-semibold"
+  }, pair)), React.createElement("div", {
+    className: "text-[10.5px] ink-3 font-serif italic mt-0.5"
+  }, why));
+  const DecisionRow = ({
+    color,
+    label,
+    detail
+  }) => {
+    const c = color === 'emerald' ? 'text-emerald-400 border-emerald-500/40' : color === 'amber' ? 'text-amber-300 border-amber-500/40' : 'text-violet-300 border-violet-500/40';
+    return React.createElement("div", {
+      className: `panel-2 rounded p-2.5 border-l-2 ${c.split(' ')[1]}`
+    }, React.createElement("div", {
+      className: `text-[11px] font-bold ${c.split(' ')[0]}`
+    }, label), React.createElement("div", {
+      className: "text-[11.5px] ink-2 mt-0.5 leading-relaxed"
+    }, detail));
+  };
+  return React.createElement(Fragment, null, React.createElement("div", {
+    className: "fixed inset-0 drawer-overlay z-40",
+    onClick: onClose
+  }), React.createElement("div", {
+    className: "fixed top-0 right-0 bottom-0 w-full md:w-[640px] panel border-l divider z-50 overflow-y-auto",
+    style: {
+      background: 'var(--bg-1)'
+    }
+  }, React.createElement("div", {
+    className: "sticky top-0 panel border-b divider px-5 py-4 z-10",
+    style: {
+      background: 'var(--bg-1)'
+    }
+  }, React.createElement("div", {
+    className: "flex items-start justify-between gap-4"
+  }, React.createElement("div", null, React.createElement("div", {
+    className: "flex items-center gap-2 mb-1"
+  }, React.createElement("span", {
+    className: "num text-[10.5px] font-bold text-amber-300 tracking-wider"
+  }, action.id), React.createElement(Pill, {
+    color: action.lane === 1 ? 'red' : action.lane === 2 ? 'amber' : 'violet'
+  }, "LANE ", action.lane), React.createElement(Pill, {
+    color: action.confidence >= 85 ? 'emerald' : action.confidence >= 75 ? 'amber' : 'violet'
+  }, "CONF ", action.confidence, "%")), React.createElement("div", {
+    className: "text-[15px] font-bold tracking-tight leading-tight"
+  }, action.title), React.createElement("div", {
+    className: "text-[11px] ink-3 mt-1"
+  }, action.laneDescription)), React.createElement("button", {
+    onClick: onClose,
+    className: "text-ink-3 hover:text-ink text-2xl leading-none"
+  }, "\xD7"))), React.createElement("div", {
+    className: "px-5 py-4 space-y-3"
+  }, React.createElement("div", {
+    className: "grid grid-cols-3 gap-3"
+  }, React.createElement(KV, {
+    k: "Cost",
+    v: action.costLabel,
+    mono: true
+  }), React.createElement(KV, {
+    k: "PoF",
+    v: action.pof,
+    mono: true
+  }), React.createElement(KV, {
+    k: "Urgency",
+    v: action.urgency
+  })), React.createElement("div", null, renderBody()))));
+};
+const ResolvePredictView = ({
+  onTransition,
+  onJumpToLane
+}) => {
+  const [tab, setTab] = useState('diagnosis');
+  const [drawerAction, setDrawerAction] = useState(null);
+  return React.createElement("div", {
+    className: "max-w-[1680px] mx-auto px-6 pb-10 tab-fade"
+  }, React.createElement("div", {
+    className: "flex items-center justify-between mb-3"
+  }, React.createElement(Breadcrumb, {
+    items: ['Resolve Predict', 'GH01 Fleet Diagnosis', 'Contamination Event']
+  }), React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, React.createElement(Pill, {
+    color: "amber"
+  }, React.createElement("span", {
+    className: "w-1 h-1 rounded-full bg-amber-300 pulse-dot mr-1"
+  }), " AI Analysis \xB7 14:24 CET"), React.createElement(Pill, {
+    color: "cyan"
+  }, "5 evidence sources"))), React.createElement("div", {
+    className: "panel rounded-md p-5 mb-4",
+    style: {
+      background: 'linear-gradient(135deg, rgba(217,167,65,0.04) 0%, var(--bg-1) 60%)',
+      borderLeft: '3px solid var(--amber)'
+    }
+  }, React.createElement("div", {
+    className: "flex items-start justify-between gap-4 flex-wrap"
+  }, React.createElement("div", {
+    className: "max-w-3xl"
+  }, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-amber-300 font-bold mb-1"
+  }, "RESOLVE PREDICT \xB7 FLEET-LEVEL DIAGNOSIS"), React.createElement("div", {
+    className: "text-xl font-bold tracking-tight mb-1"
+  }, "Contamination Cascade \xB7 20 Modules Affected"), React.createElement("div", {
+    className: "text-[12px] ink-2 font-serif italic leading-relaxed"
+  }, "AVEVA CONNECT showed ", React.createElement("i", null, "what"), ". Resolve Predict reasons across all 20 modules at once \u2014 combined with work order history from IFS Cloud, OEM technical bulletins, and operating context \u2014 to explain ", React.createElement("i", null, "why"), " and prescribe ", React.createElement("i", null, "what to do"), ", each with a confidence score.")), React.createElement("div", {
+    className: "flex gap-2 flex-wrap"
+  }, React.createElement(Pill, {
+    color: "red"
+  }, "\u20AC4.5M consequence"), React.createElement(Pill, {
+    color: "amber"
+  }, "22:1 ratio"), React.createElement(Pill, {
+    color: "emerald"
+  }, "97% confidence")))), React.createElement("div", {
+    className: "flex items-center gap-1 border-b divider mb-5"
+  }, RP_TABS.map(t => React.createElement("button", {
+    key: t.id,
+    onClick: () => setTab(t.id),
+    className: `relative px-4 py-2.5 text-left ${tab === t.id ? 'nav-active text-amber-300' : 'ink-3 hover:text-ink'}`
+  }, React.createElement("div", {
+    className: `text-[12.5px] font-bold ${tab === t.id ? 'text-amber-300' : ''}`
+  }, t.label), React.createElement("div", {
+    className: "text-[10.5px] ink-3 tracking-wide"
+  }, t.subtitle))), React.createElement("div", {
+    className: "flex-1"
+  })), tab === 'diagnosis' && React.createElement(RPDiagnosisTab, null), tab === 'assessment' && React.createElement(RPAssessmentTab, null), tab === 'actions' && React.createElement(ActionsTab, {
+    onJumpToLane: onJumpToLane,
+    onSelectAction: setDrawerAction
+  }), drawerAction && React.createElement(ActionDrawer, {
+    action: drawerAction,
+    onClose: () => setDrawerAction(null)
+  }));
+};
+const IFS_TABS = [{
+  id: 'workorder',
+  label: 'PSO Work Order Assignment',
+  subtitle: 'WO-2026-01187 · Lane 1'
+}, {
+  id: 'mobile',
+  label: 'IFS Mobile · Field Execution',
+  subtitle: 'Marco Ricci · in-progress'
+}, {
+  id: 'fmeca',
+  label: 'IFS Loops Digital Worker',
+  subtitle: 'FMECA library updates'
+}];
+const WorkOrderTab = () => {
+  const w = WORK_ORDER;
+  return React.createElement("div", {
+    className: "tab-fade"
+  }, React.createElement(Panel, {
+    title: `${w.id} · ${w.title}`,
+    subtitle: `Resolve Predict prescriptive recommendation routed to IFS Cloud EAM. Reliability engineer approved 11 minutes ago.`,
+    accent: "coral",
+    actions: React.createElement("div", {
+      className: "flex gap-2"
+    }, React.createElement(Pill, {
+      color: "red"
+    }, w.priority), React.createElement(Pill, {
+      color: "amber"
+    }, w.status)),
+    className: "mb-4"
+  }, React.createElement("div", {
+    className: "p-5 grid grid-cols-1 lg:grid-cols-4 gap-4"
+  }, React.createElement(KV, {
+    k: "Asset",
+    v: w.asset,
+    mono: true
+  }), React.createElement(KV, {
+    k: "Estimated Duration",
+    v: w.duration
+  }), React.createElement(KV, {
+    k: "Permits Required",
+    v: w.permits.join(' · ')
+  }), React.createElement(KV, {
+    k: "Materials",
+    v: w.materials
+  }))), React.createElement(Panel, {
+    title: "IFS Cloud PSO \xB7 Crew Assignment Optimization",
+    subtitle: "Planning and Scheduling Optimization evaluates work order requirements against the available workforce \u2014 skills, certifications, location, availability, and priority. Assignment computed in 1.4 seconds.",
+    accent: "coral",
+    className: "mb-4"
+  }, React.createElement("div", {
+    className: "p-5 grid grid-cols-1 lg:grid-cols-3 gap-4"
+  }, React.createElement("div", {
+    className: "panel-2 rounded p-4 border-l-2 border-emerald-500"
+  }, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider text-emerald-400 font-bold mb-2"
+  }, "PRIMARY \xB7 ASSIGNED"), React.createElement("div", {
+    className: "text-[14px] font-bold"
+  }, w.technician.name), React.createElement("div", {
+    className: "text-[10.5px] num ink-3 mb-2"
+  }, w.technician.id), React.createElement("div", {
+    className: "text-[11px] ink-2 font-serif italic leading-relaxed"
+  }, w.technician.cert), React.createElement("div", {
+    className: "mt-3 pt-3 border-t divider"
+  }, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold mb-1"
+  }, "Match basis"), React.createElement("ul", {
+    className: "text-[11.5px] ink-2 space-y-0.5 list-disc list-inside"
+  }, React.createElement("li", null, "On shift \xB7 available"), React.createElement("li", null, "Performed this exact procedure 6\xD7 previously"), React.createElement("li", null, "Most recent: WO-2024-03101 (8 mo ago)"), React.createElement("li", null, "All required certs current")))), React.createElement("div", {
+    className: "panel-2 rounded p-4 border-l-2 border-amber-500"
+  }, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider text-amber-300 font-bold mb-2"
+  }, "BACKUP \xB7 QUALIFIED"), React.createElement("div", {
+    className: "text-[14px] font-bold"
+  }, w.backup.name), React.createElement("div", {
+    className: "text-[10.5px] num ink-3 mb-2"
+  }, w.backup.id), React.createElement("div", {
+    className: "text-[11px] ink-2 font-serif italic leading-relaxed"
+  }, w.backup.note)), React.createElement("div", {
+    className: "panel-2 rounded p-4 border-l-2 border-cyan-500"
+  }, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider text-cyan-300 font-bold mb-2"
+  }, "RESCHEDULED \xB7 NO IMPACT"), React.createElement("div", {
+    className: "text-[14px] font-bold"
+  }, w.rescheduled.name), React.createElement("div", {
+    className: "text-[10.5px] num ink-3 mb-2"
+  }, "deferred ", w.rescheduled.deferral), React.createElement("div", {
+    className: "text-[11px] ink-2 font-serif italic leading-relaxed"
+  }, w.rescheduled.impact, ". The work order priority (Urgent) automatically overrides lower-priority planned work.")))), React.createElement(Panel, {
+    title: "Resolve Predict Diagnostic Context \xB7 Embedded in Work Package",
+    subtitle: "The technician will see why this work order exists \u2014 not just what to do. This is what enriches IFS Cloud's operational execution with the AI's diagnostic reasoning.",
+    accent: "amber",
+    className: "mb-4"
+  }, React.createElement("div", {
+    className: "p-5 space-y-3"
+  }, React.createElement("div", null, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-amber-300 font-bold mb-1.5"
+  }, "Root Cause Summary"), React.createElement("div", {
+    className: "text-[12px] ink-2 font-serif italic leading-relaxed border-l-2 border-amber-500/40 pl-4"
+  }, w.resolveContext)), React.createElement("div", null, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-amber-300 font-bold mb-1.5"
+  }, "Inspection Guidance"), React.createElement("div", {
+    className: "text-[12px] ink-2 font-serif italic leading-relaxed border-l-2 border-amber-500/40 pl-4"
+  }, w.inspectionGuidance)))));
+};
+const MobileTab = () => {
+  const w = WORK_ORDER;
+  const pe = w.postExecution;
+  return React.createElement("div", {
+    className: "tab-fade"
+  }, React.createElement(Panel, {
+    title: "IFS Mobile \xB7 Marco's Tablet",
+    subtitle: "The work package on Marco's tablet is not a generic procedure \u2014 it is enriched with Resolve Predict's diagnostic context, so the technician understands not just what to do but why this work order exists.",
+    accent: "coral",
+    className: "mb-4"
+  }, React.createElement("div", {
+    className: "p-6 grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-8"
+  }, React.createElement("div", {
+    className: "mx-auto"
+  }, React.createElement("div", {
+    className: "relative w-[400px] rounded-[28px] p-2 shadow-2xl",
+    style: {
+      background: 'linear-gradient(180deg, #1A2738 0%, #0A1018 100%)',
+      border: '1px solid var(--line-2)'
+    }
+  }, React.createElement("div", {
+    className: "rounded-[20px] overflow-hidden",
+    style: {
+      background: '#0F1923',
+      border: '1px solid var(--line)'
+    }
+  }, React.createElement("div", {
+    className: "flex items-center justify-between px-5 py-2.5 text-[10px] num"
+  }, React.createElement("span", {
+    className: "ink-2"
+  }, "14:38"), React.createElement("span", {
+    className: "ink-3"
+  }, "IFS Mobile"), React.createElement("span", {
+    className: "ink-2 flex items-center gap-1"
+  }, "\u25CF\u25CF\u25CF\u25CF\u25CF ", React.createElement("span", {
+    className: "ink-3"
+  }, "95%"))), React.createElement("div", {
+    className: "px-5 py-3 border-b divider",
+    style: {
+      background: 'rgba(232,101,74,0.06)',
+      borderColor: 'rgba(232,101,74,0.2)'
+    }
+  }, React.createElement("div", {
+    className: "flex items-center justify-between"
+  }, React.createElement("span", {
+    className: "num text-[10px] font-bold text-orange-300 tracking-wider"
+  }, w.id), React.createElement(Pill, {
+    color: "red"
+  }, "URGENT")), React.createElement("div", {
+    className: "text-[13px] font-bold mt-1 leading-tight"
+  }, "Emergency resin replacement"), React.createElement("div", {
+    className: "text-[10px] num ink-3 mt-0.5"
+  }, "V-201A \xB7 V-201B")), React.createElement("div", {
+    className: "mx-3 mt-3 p-2.5 rounded",
+    style: {
+      background: 'rgba(217,167,65,0.07)',
+      border: '1px solid rgba(217,167,65,0.25)'
+    }
+  }, React.createElement("div", {
+    className: "flex items-center gap-1.5 mb-1"
+  }, React.createElement("span", {
+    className: "w-1 h-1 rounded-full bg-amber-300"
+  }), React.createElement("span", {
+    className: "text-[9px] uppercase tracking-wider text-amber-300 font-bold"
+  }, "WHY THIS MATTERS \xB7 RESOLVE PREDICT")), React.createElement("div", {
+    className: "text-[10.5px] ink-2 leading-snug"
+  }, "Every additional hour adds incremental damage to 16 remaining recoverable modules. ", React.createElement("b", {
+    className: "text-red-300"
+  }, "Highest-priority action in the fleet."))), React.createElement("div", {
+    className: "px-3 py-3"
+  }, React.createElement("div", {
+    className: "text-[9px] uppercase tracking-wider ink-3 font-bold mb-2"
+  }, "PROGRESS \xB7 7 of 8 COMPLETE"), React.createElement("div", {
+    className: "space-y-1.5"
+  }, React.createElement(StepItem, {
+    time: "08:15",
+    text: "LOTO applied",
+    done: true
+  }), React.createElement(StepItem, {
+    time: "08:45",
+    text: "V-201A drained and opened",
+    done: true
+  }), React.createElement(StepItem, {
+    time: "09:30",
+    text: "Spent resin removed",
+    done: true
+  }), React.createElement(StepItem, {
+    time: "09:45",
+    text: "Internals inspected",
+    done: true
+  }), React.createElement(StepItem, {
+    time: "10:30",
+    text: "New resin loaded (V-201A)",
+    done: true
+  }), React.createElement(StepItem, {
+    time: "11:15",
+    text: "V-201A pressure-tested",
+    done: true
+  }), React.createElement(StepItem, {
+    time: "11:30",
+    text: "V-201A back online",
+    done: true
+  }), React.createElement(StepItem, {
+    time: "\u2014",
+    text: "V-201B sequence \xB7 in progress",
+    active: true
+  }))), React.createElement("div", {
+    className: "mx-3 mb-3 p-2.5 rounded panel-2"
+  }, React.createElement("div", {
+    className: "text-[9px] uppercase tracking-wider ink-3 font-bold mb-1.5"
+  }, "FIELD FINDINGS \xB7 MARCO"), React.createElement("div", {
+    className: "text-[10.5px] ink-2 leading-snug font-serif italic"
+  }, "\"Spent resin in V-201A shows severe iron fouling. Color dark brown vs normal amber. No channeling. Bed internals good.\""), React.createElement("div", {
+    className: "text-[9px] ink-3 mt-2 num"
+  }, "\uD83D\uDCF7 ", pe.photoCount, " photos attached")), React.createElement("div", {
+    className: "mx-3 mb-3 p-2.5 rounded",
+    style: {
+      background: 'rgba(95,203,140,0.07)',
+      border: '1px solid rgba(95,203,140,0.3)'
+    }
+  }, React.createElement("div", {
+    className: "flex items-center gap-1.5 mb-1.5"
+  }, React.createElement("span", {
+    className: "text-[10px]"
+  }, "\u2713"), React.createElement("span", {
+    className: "text-[9px] uppercase tracking-wider text-emerald-400 font-bold"
+  }, "POST-REPLACEMENT QUALITY \xB7 V-201A")), React.createElement("div", {
+    className: "grid grid-cols-2 gap-1.5 text-[10px] num"
+  }, React.createElement("div", null, React.createElement("span", {
+    className: "ink-3"
+  }, "Resistivity"), " ", React.createElement("span", {
+    className: "text-emerald-400 font-bold"
+  }, "16.8 M\u03A9\xB7cm")), React.createElement("div", null, React.createElement("span", {
+    className: "ink-3"
+  }, "Iron"), " ", React.createElement("span", {
+    className: "text-emerald-400 font-bold"
+  }, "<2 ppb")), React.createElement("div", null, React.createElement("span", {
+    className: "ink-3"
+  }, "\u0394P V-201A"), " ", React.createElement("span", {
+    className: "text-emerald-400 font-bold"
+  }, "0.32 bar")), React.createElement("div", null, React.createElement("span", {
+    className: "ink-3"
+  }, "\u0394P V-201B"), " ", React.createElement("span", {
+    className: "text-emerald-400 font-bold"
+  }, "0.31 bar")))), React.createElement("div", {
+    className: "px-3 pb-3"
+  }, React.createElement("button", {
+    className: "w-full py-2.5 rounded font-bold text-[11px] tracking-wide",
+    style: {
+      background: 'var(--grad-ifs)',
+      color: '#0A1018'
+    }
+  }, "LOG STEP \u2192 V-201B"))))), React.createElement("div", {
+    className: "space-y-4"
+  }, React.createElement("div", null, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-orange-300 font-bold mb-1.5"
+  }, "EXECUTION SUMMARY"), React.createElement("div", {
+    className: "grid grid-cols-2 sm:grid-cols-4 gap-3"
+  }, React.createElement(KV, {
+    k: "Start",
+    v: pe.startTime,
+    mono: true
+  }), React.createElement(KV, {
+    k: "End (est.)",
+    v: pe.endTime,
+    mono: true
+  }), React.createElement(KV, {
+    k: "Duration",
+    v: pe.duration
+  }), React.createElement(KV, {
+    k: "Photos",
+    v: `${pe.photoCount} attached`
+  }))), React.createElement("div", null, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-orange-300 font-bold mb-1.5"
+  }, "LINKED DOCUMENTATION"), React.createElement("div", {
+    className: "space-y-1.5"
+  }, [{
+    label: 'SOP-WAT-003 · Resin Replacement Procedure',
+    meta: 'Standard operating procedure'
+  }, {
+    label: 'SDS · Purolite NRW37 Spent Resin Disposal',
+    meta: 'Safety data sheet'
+  }, {
+    label: 'LOTO-P-101-204 · Feed Pump Isolation',
+    meta: 'Lockout/tagout procedure'
+  }, {
+    label: 'AVEVA AIM · GH01-WAT P&ID Digital Twin',
+    meta: 'V-201A/B highlighted'
+  }].map((d, i) => React.createElement("div", {
+    key: i,
+    className: "panel-2 rounded px-3 py-2 flex items-center gap-3 hover:bg-white/[0.02] cursor-pointer"
+  }, React.createElement("div", {
+    className: "w-7 h-7 rounded grid place-items-center text-[11px]",
+    style: {
+      background: 'rgba(232,101,74,0.1)',
+      color: '#E8654A'
+    }
+  }, "\uD83D\uDCC4"), React.createElement("div", {
+    className: "flex-1 min-w-0"
+  }, React.createElement("div", {
+    className: "text-[12px] font-semibold truncate"
+  }, d.label), React.createElement("div", {
+    className: "text-[10px] ink-3"
+  }, d.meta)), React.createElement("div", {
+    className: "text-ink-4"
+  }, "\u203A"))))), React.createElement("div", null, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-emerald-400 font-bold mb-1.5"
+  }, "FEEDBACK LOOP \xB7 WHAT FLOWS BACK"), React.createElement("div", {
+    className: "space-y-2 text-[12px] ink-2 leading-relaxed"
+  }, React.createElement("div", {
+    className: "flex gap-3"
+  }, React.createElement("span", {
+    className: "text-emerald-400 flex-shrink-0"
+  }, "\u2192 IFS EAM"), React.createElement("span", null, "Updates V-201A/B asset records \xB7 schedules next PM (capital-protected)")), React.createElement("div", {
+    className: "flex gap-3"
+  }, React.createElement("span", {
+    className: "text-emerald-400 flex-shrink-0"
+  }, "\u2192 AVEVA CONNECT"), React.createElement("span", null, "Post-fix water quality establishes new monitoring baseline \xB7 begins tracking deceleration")), React.createElement("div", {
+    className: "flex gap-3"
+  }, React.createElement("span", {
+    className: "text-emerald-400 flex-shrink-0"
+  }, "\u2192 Resolve Predict"), React.createElement("span", null, "Root cause confirmed \xB7 30-day post-fix data window opens for Tier 2 reassessment")), React.createElement("div", {
+    className: "flex gap-3"
+  }, React.createElement("span", {
+    className: "text-emerald-400 flex-shrink-0"
+  }, "\u2192 Copperleaf"), React.createElement("span", null, "Updated fleet assessment available for next replanning cycle")))), React.createElement("div", {
+    className: "panel-2 rounded p-3 border-l-2 border-amber-500",
+    style: {
+      background: 'rgba(217,167,65,0.04)'
+    }
+  }, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-amber-300 font-bold mb-1"
+  }, "Marco's findings validate the AI"), React.createElement("div", {
+    className: "text-[11.5px] ink-2 font-serif italic leading-relaxed"
+  }, "His observation that the spent resin was \"severely iron-fouled, dark brown vs normal amber\" independently confirms Resolve Predict's root cause analysis. Human validation strengthens platform confidence in future recommendations."))))));
+};
+const StepItem = ({
+  time,
+  text,
+  done,
+  active
+}) => React.createElement("div", {
+  className: "flex items-center gap-2 text-[10.5px]"
+}, React.createElement("span", {
+  className: `w-3.5 h-3.5 rounded-full flex-shrink-0 grid place-items-center text-[8px] font-bold ${done ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : active ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 pulse-dot' : 'border divider'}`
+}, done ? '✓' : active ? '·' : ''), React.createElement("span", {
+  className: `num text-[9.5px] ${active ? 'text-amber-300' : 'ink-3'} w-10`
+}, time), React.createElement("span", {
+  className: `${done ? 'ink-2' : active ? 'text-ink font-semibold' : 'ink-3'} text-[10.5px]`
+}, text));
+const FmecaTab = () => {
+  return React.createElement("div", {
+    className: "tab-fade"
+  }, React.createElement(Panel, {
+    title: "IFS Loops Digital Worker \xB7 FMECA Library Update Proposals",
+    subtitle: "When Marco completed WO-2026-01187, an autonomous agent activated. It detected that the resolved failure mechanism (iron contamination from deferred resin replacement causing fleet-wide membrane degradation) reveals gaps in the plant's FMECA library \u2014 undocumented failure modes and mispriced consequence ratings. The agent drafts the updates; the reliability engineer approves.",
+    accent: "coral",
+    className: "mb-4",
+    actions: React.createElement(Pill, {
+      color: "violet"
+    }, "2 drafts pending review")
+  }, React.createElement("div", {
+    className: "p-5"
+  }, React.createElement("div", {
+    className: "grid grid-cols-1 lg:grid-cols-3 gap-3 mb-4"
+  }, React.createElement(TriggerCard, {
+    icon: "\uD83D\uDD0D",
+    label: "TRIGGER 1",
+    text: "WO resolved a Resolve Predict root cause diagnosis"
+  }), React.createElement(TriggerCard, {
+    icon: "\u2713",
+    label: "TRIGGER 2",
+    text: "Technician's field findings independently confirmed the AI's analysis"
+  }), React.createElement(TriggerCard, {
+    icon: "\u26A0",
+    label: "TRIGGER 3",
+    text: "Failure mechanism reveals an undocumented gap in the FMECA library"
+  })), React.createElement("div", {
+    className: "panel-2 rounded p-4 mb-3",
+    style: {
+      background: 'rgba(153,133,232,0.04)',
+      borderLeft: '3px solid var(--violet)'
+    }
+  }, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-violet-300 font-bold mb-1"
+  }, "What the Digital Worker identified"), React.createElement("div", {
+    className: "text-[12px] ink-2 font-serif italic leading-relaxed"
+  }, "The existing FMECA for PEM electrolyzer modules lists membrane degradation only as \"normal end-of-life aging.\" It does ", React.createElement("i", null, "not"), " include \"accelerated catalyst poisoning from upstream feedwater iron contamination\" \u2014 a cross-system cascading failure only revealed through operating experience. The FMECA for the water purification system lists \"resin exhaustion\" with consequence scored ", React.createElement("b", {
+    className: "not-italic font-sans text-red-300"
+  }, "Low"), " based on the asset's own replacement cost (\u20AC50K) \u2014 not the ", React.createElement("b", {
+    className: "not-italic font-sans text-red-300"
+  }, "\u20AC4.5M downstream fleet damage"), " that actually resulted.")))), FMECA_UPDATES.map((proposal, idx) => React.createElement(Panel, {
+    key: proposal.id,
+    title: `FMECA UPDATE PROPOSAL ${idx + 1} · ${proposal.target}`,
+    subtitle: proposal.assets,
+    accent: idx === 0 ? 'coral' : 'amber',
+    className: "mb-3",
+    actions: React.createElement(Pill, {
+      color: "violet"
+    }, "DRAFT \u2014 pending review")
+  }, React.createElement("div", {
+    className: "p-5 grid grid-cols-1 gap-2.5"
+  }, proposal.fields.map((f, i) => React.createElement("div", {
+    key: i,
+    className: "grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-2 sm:gap-4 py-2 border-b border-white/[0.04] last:border-0"
+  }, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider ink-3 font-semibold pt-0.5"
+  }, f.k), React.createElement("div", {
+    className: "text-[12px] ink-2 leading-relaxed"
+  }, f.k === 'Existing Consequence Rating' ? React.createElement("span", null, React.createElement("s", {
+    className: "ink-4"
+  }, f.v)) : f.k === 'Revised Consequence Rating' ? React.createElement("b", {
+    className: "text-red-300"
+  }, f.v) : f.v))), React.createElement("div", {
+    className: "grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-2 sm:gap-4 py-2"
+  }, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider ink-3 font-semibold pt-0.5"
+  }, "Source"), React.createElement("div", {
+    className: "text-[12px] ink-2 num"
+  }, "WO-2026-01187 \xB7 Resolve Predict fleet diagnosis"))), React.createElement("div", {
+    className: "px-5 py-3 border-t divider bg-white/[0.01] flex items-center justify-between gap-3 flex-wrap"
+  }, React.createElement("div", {
+    className: "text-[11.5px] ink-3 font-serif italic"
+  }, "Reliability engineer must approve before publication to the active FMECA library."), React.createElement("div", {
+    className: "flex gap-2"
+  }, React.createElement("button", {
+    className: "px-3 py-1.5 rounded text-[11px] font-semibold tracking-wide border divider ink-2 hover:text-ink"
+  }, "REQUEST EDITS"), React.createElement("button", {
+    className: "px-3 py-1.5 rounded text-[11px] font-semibold tracking-wide",
+    style: {
+      background: 'var(--grad-copperleaf)',
+      color: '#0A1018'
+    }
+  }, "APPROVE & PUBLISH"))))), React.createElement(Panel, {
+    title: "Why the Digital Worker Matters",
+    accent: "violet",
+    className: "mt-4"
+  }, React.createElement("div", {
+    className: "p-5"
+  }, React.createElement("div", {
+    className: "text-[12px] ink-2 font-serif italic leading-relaxed"
+  }, "Most organizations lose institutional knowledge when a technician retires, transfers, or simply forgets. The insight that \"deferring resin replacement caused \u20AC4.5M in membrane damage\" exists in Marco's head, in the reliability engineer's investigation notes, and in a Resolve Predict log \u2014 but without the Digital Worker, the FMECA that drives maintenance strategy ", React.createElement("i", null, "never gets updated to reflect the true risk"), "."), React.createElement("div", {
+    className: "text-[12px] ink-2 mt-3 leading-relaxed"
+  }, React.createElement("span", {
+    className: "font-sans not-italic text-violet-300 font-semibold tracking-wide"
+  }, "The IFS Loops Digital Worker closes this gap."), " It watches for events that reveal undocumented failure modes or mispriced consequences in the FMECA library, and routes update proposals for human review. The result is a continuously improving risk register that makes every future diagnosis more accurate, every future work package more informed, and every future deferral decision more visible. The system doesn't just learn from its data \u2014 it updates the systematic risk framework so the learning is permanent."))));
+};
+const TriggerCard = ({
+  icon,
+  label,
+  text
+}) => React.createElement("div", {
+  className: "panel-2 rounded p-3 border-l-2 border-violet-500"
+}, React.createElement("div", {
+  className: "flex items-center gap-2 mb-1.5"
+}, React.createElement("span", {
+  className: "text-[16px]"
+}, icon), React.createElement("span", {
+  className: "text-[10px] uppercase tracking-wider text-violet-300 font-bold"
+}, label)), React.createElement("div", {
+  className: "text-[11.5px] ink-2 leading-snug"
+}, text));
+const IfsCloudView = ({
+  onTransition
+}) => {
+  const [tab, setTab] = useState('workorder');
+  return React.createElement("div", {
+    className: "max-w-[1680px] mx-auto px-6 pb-10 tab-fade"
+  }, React.createElement("div", {
+    className: "flex items-center justify-between mb-3"
+  }, React.createElement(Breadcrumb, {
+    items: ['IFS Cloud', 'EAM · Work Orders', 'WO-2026-01187']
+  }), React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, React.createElement(Pill, {
+    color: "emerald"
+  }, "Approved 11 min ago"), React.createElement(Pill, {
+    color: "coral"
+  }, "Lane 1 \xB7 Emergency"))), React.createElement("div", {
+    className: "panel rounded-md p-5 mb-4",
+    style: {
+      background: 'linear-gradient(135deg, rgba(232,101,74,0.04) 0%, var(--bg-1) 60%)',
+      borderLeft: '3px solid var(--coral)'
+    }
+  }, React.createElement("div", {
+    className: "flex items-start justify-between gap-4 flex-wrap"
+  }, React.createElement("div", {
+    className: "max-w-3xl"
+  }, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-orange-300 font-bold mb-1"
+  }, "IFS CLOUD \xB7 EXECUTE"), React.createElement("div", {
+    className: "text-xl font-bold tracking-tight mb-1"
+  }, "From Recommendation to Dispatched to Executed \u2014 in 24 Hours"), React.createElement("div", {
+    className: "text-[12px] ink-2 font-serif italic leading-relaxed"
+  }, "Resolve Predict diagnoses. PSO finds the right technician and clears their schedule. IFS Mobile delivers the work package with the AI's diagnostic context. The technician executes, records findings in the field, and those findings flow back to validate the AI and update the FMECA library. ", React.createElement("span", {
+    className: "not-italic font-sans text-orange-300 font-semibold"
+  }, "All within the same platform. All traceable."))))), React.createElement("div", {
+    className: "flex items-center gap-1 border-b divider mb-5"
+  }, IFS_TABS.map(t => React.createElement("button", {
+    key: t.id,
+    onClick: () => setTab(t.id),
+    className: `relative px-4 py-2.5 text-left ${tab === t.id ? 'nav-active text-orange-300' : 'ink-3 hover:text-ink'}`
+  }, React.createElement("div", {
+    className: `text-[12.5px] font-bold ${tab === t.id ? 'text-orange-300' : ''}`
+  }, t.label), React.createElement("div", {
+    className: "text-[10.5px] ink-3 tracking-wide"
+  }, t.subtitle))), React.createElement("div", {
+    className: "flex-1"
+  })), tab === 'workorder' && React.createElement(WorkOrderTab, null), tab === 'mobile' && React.createElement(MobileTab, null), tab === 'fmeca' && React.createElement(FmecaTab, null), React.createElement("div", {
+    className: "mt-6 panel rounded-md p-5",
+    style: {
+      background: 'linear-gradient(135deg, rgba(95,203,140,0.05) 0%, var(--bg-1) 60%)',
+      borderLeft: '3px solid var(--emerald)'
+    }
+  }, React.createElement("div", {
+    className: "flex items-start justify-between gap-6 flex-wrap"
+  }, React.createElement("div", {
+    className: "max-w-3xl"
+  }, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-emerald-400 font-bold mb-1.5"
+  }, "NOW THE CAPITAL ITEMS"), React.createElement("div", {
+    className: "text-base font-bold tracking-tight mb-1"
+  }, "Lane 1 emergency action complete. What about Lanes 2 and 3?"), React.createElement("div", {
+    className: "text-[12px] ink-2 font-serif italic leading-relaxed"
+  }, "The \u20AC50K resin replacement is the operational fix. But Tier 1 stack replacements (\u20AC2.8M), Module 17 refurbishment (\u20AC450K), secondary iron filtration (\u20AC150K), and the \u20AC1.35M Tier 2 conditional reserve all flow to Copperleaf. ", React.createElement("span", {
+    className: "not-italic font-sans text-emerald-400 font-semibold"
+  }, "Watch the capital plan reoptimize live."))), React.createElement("button", {
+    onClick: () => onTransition('copperleaf'),
+    className: "px-5 py-3 rounded font-bold text-[12px] tracking-wide flex items-center gap-2 transition-transform hover:translate-x-0.5",
+    style: {
+      background: 'var(--grad-copperleaf)',
+      color: '#0A1018'
+    }
+  }, "OPEN IN COPPERLEAF", React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 14 14",
+    fill: "none"
+  }, React.createElement("path", {
+    d: "M3 7 H11 M7 3 L11 7 L7 11",
+    stroke: "currentColor",
+    strokeWidth: "1.8",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }))))));
+};
+const SnapshotComparisonChart = () => {
+  const data = SNAPSHOTS.map(s => ({
+    label: s.label,
+    date: s.date.split(' (')[0],
+    firm: s.total,
+    conditional: s.conditional || 0,
+    released: s.released || 0
+  }));
+  return React.createElement(ResponsiveContainer, {
+    width: "100%",
+    height: 220
+  }, React.createElement(BarChart, {
+    data: data,
+    margin: {
+      top: 10,
+      right: 12,
+      left: 0,
+      bottom: 0
+    },
+    barCategoryGap: "22%"
+  }, React.createElement(CartesianGrid, {
+    stroke: chartTheme().grid,
+    strokeDasharray: "2 4",
+    vertical: false
+  }), React.createElement(XAxis, {
+    dataKey: "label",
+    stroke: chartTheme().tick,
+    tick: {
+      fontSize: 11,
+      fill: chartTheme().tickLabel
+    },
+    tickLine: false,
+    axisLine: {
+      stroke: '#243446'
+    }
+  }), React.createElement(YAxis, {
+    stroke: chartTheme().tick,
+    tick: {
+      fontSize: 10,
+      fill: chartTheme().tick
+    },
+    tickLine: false,
+    axisLine: false,
+    tickFormatter: v => `€${(v / 1000000).toFixed(1)}M`
+  }), React.createElement(Tooltip, {
+    contentStyle: {
+      background: chartTheme().tooltipBg,
+      border: '1px solid ' + chartTheme().tooltipBorder,
+      borderRadius: 4,
+      fontSize: 11
+    },
+    formatter: (v, n) => [`€${(v / 1000000).toFixed(2)}M`, n === 'firm' ? 'Firm commitments' : n === 'conditional' ? 'Conditional reserve' : 'Released'],
+    cursor: {
+      fill: 'rgba(255,255,255,0.03)'
+    }
+  }), React.createElement(Legend, {
+    wrapperStyle: {
+      fontSize: 11,
+      paddingTop: 8
+    },
+    iconType: "square"
+  }), React.createElement(Bar, {
+    dataKey: "firm",
+    stackId: "a",
+    fill: "#5FCB8C",
+    name: "Firm commitments",
+    radius: [0, 0, 0, 0]
+  }), React.createElement(Bar, {
+    dataKey: "conditional",
+    stackId: "a",
+    fill: "#9985E8",
+    name: "Conditional reserve",
+    radius: [3, 3, 0, 0]
+  })));
+};
+const CopperleafView = ({
+  onTransition
+}) => {
+  const [snapIdx, setSnapIdx] = useState(1);
+  const snap = SNAPSHOTS[snapIdx];
+  return React.createElement("div", {
+    className: "max-w-[1680px] mx-auto px-6 pb-10 tab-fade"
+  }, React.createElement("div", {
+    className: "flex items-center justify-between mb-3"
+  }, React.createElement(Breadcrumb, {
+    items: ['Copperleaf', 'GH01 Lombardia', 'Capital Plan FY26']
+  }), React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, React.createElement(Pill, {
+    color: "emerald"
+  }, "CONTINUOUSLY OPTIMIZING"), React.createElement(Pill, {
+    color: "cyan"
+  }, "Live inputs from Resolve Predict"))), React.createElement("div", {
+    className: "panel rounded-md p-5 mb-4",
+    style: {
+      background: 'linear-gradient(135deg, rgba(95,203,140,0.04) 0%, var(--bg-1) 60%)',
+      borderLeft: '3px solid var(--emerald)'
+    }
+  }, React.createElement("div", {
+    className: "flex items-start justify-between gap-4 flex-wrap"
+  }, React.createElement("div", {
+    className: "max-w-3xl"
+  }, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-emerald-400 font-bold mb-1"
+  }, "COPPERLEAF \xB7 CONTINUOUS PORTFOLIO OPTIMIZATION"), React.createElement("div", {
+    className: "text-xl font-bold tracking-tight mb-1"
+  }, "From Annual Snapshot to Living Capital Plan"), React.createElement("div", {
+    className: "text-[12px] ink-2 font-serif italic leading-relaxed"
+  }, "Copperleaf receives real-time condition scores, probability of failure, consequence of failure, and confidence scores from Resolve Predict \u2014 ", React.createElement("span", {
+    className: "not-italic font-sans text-emerald-400 font-semibold"
+  }, "not annual snapshots"), ". The plan reoptimizes when the risk picture changes materially. Conditional budget enables honest planning under uncertainty.")), React.createElement("div", {
+    className: "flex flex-col gap-1 text-[10.5px]"
+  }, React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, React.createElement("span", {
+    className: "ink-3 uppercase tracking-wider"
+  }, "Condition score"), React.createElement("span", {
+    className: "num text-emerald-400"
+  }, "live")), React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, React.createElement("span", {
+    className: "ink-3 uppercase tracking-wider"
+  }, "PoF (3 horizons)"), React.createElement("span", {
+    className: "num text-emerald-400"
+  }, "live")), React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, React.createElement("span", {
+    className: "ink-3 uppercase tracking-wider"
+  }, "CoF (5 dimensions)"), React.createElement("span", {
+    className: "num text-emerald-400"
+  }, "live")), React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, React.createElement("span", {
+    className: "ink-3 uppercase tracking-wider"
+  }, "Confidence score"), React.createElement("span", {
+    className: "num text-emerald-400"
+  }, "live"))))), React.createElement("div", {
+    className: "grid grid-cols-1 md:grid-cols-4 gap-2 mb-5"
+  }, SNAPSHOTS.map((s, i) => {
+    const active = i === snapIdx;
+    return React.createElement("button", {
+      key: s.id,
+      onClick: () => setSnapIdx(i),
+      className: `text-left panel rounded p-3 transition-all ${active ? 'border-emerald-500/50' : 'hover:border-white/15'}`,
+      style: active ? {
+        background: 'rgba(95,203,140,0.06)',
+        borderLeft: '3px solid var(--emerald)'
+      } : {
+        borderLeft: '3px solid transparent'
+      }
+    }, React.createElement("div", {
+      className: "flex items-center justify-between mb-1"
+    }, React.createElement("span", {
+      className: `num text-[10.5px] tracking-wider font-bold ${active ? 'text-emerald-400' : 'ink-3'}`
+    }, s.label.toUpperCase()), React.createElement("span", {
+      className: `text-[10px] ${active ? 'text-emerald-400' : 'ink-3'}`
+    }, s.date)), React.createElement("div", {
+      className: `text-[12.5px] font-bold tracking-tight leading-tight ${active ? 'text-ink' : 'ink-2'}`
+    }, s.title), React.createElement("div", {
+      className: "text-[11px] num mt-1.5 flex items-center gap-2"
+    }, React.createElement("span", {
+      className: active ? 'text-emerald-400 font-bold' : 'ink-2'
+    }, formatCurrency(s.total)), s.conditional > 0 && React.createElement("span", {
+      className: "text-violet-300 font-semibold"
+    }, "+", formatCurrency(s.conditional), "c")));
+  })), React.createElement(Panel, {
+    title: `${snap.label} · ${snap.title}`,
+    subtitle: snap.date,
+    accent: "emerald",
+    className: "mb-5",
+    actions: React.createElement("div", {
+      className: "flex gap-2 flex-wrap"
+    }, React.createElement(Pill, {
+      color: "emerald"
+    }, "Firm ", formatCurrency(snap.total)), snap.conditional > 0 && React.createElement(Pill, {
+      color: "violet"
+    }, "Conditional ", formatCurrency(snap.conditional)), snap.released > 0 && React.createElement(Pill, {
+      color: "cyan"
+    }, "Released ", formatCurrency(snap.released)))
+  }, React.createElement("div", {
+    className: "p-5"
+  }, React.createElement("div", {
+    className: "text-[12.5px] ink-2 font-serif italic leading-relaxed border-l-2 border-emerald-500/40 pl-4 mb-5"
+  }, snap.description), React.createElement("div", {
+    className: "overflow-x-auto"
+  }, React.createElement("table", {
+    className: "w-full text-[12px] tbl-tight"
+  }, React.createElement("thead", {
+    className: "border-b divider"
+  }, React.createElement("tr", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold text-left"
+  }, React.createElement("th", {
+    className: "px-3 py-2"
+  }, "Investment"), React.createElement("th", {
+    className: "px-3 py-2"
+  }, "Schedule"), React.createElement("th", {
+    className: "px-3 py-2 text-right"
+  }, "Cost"), React.createElement("th", {
+    className: "px-3 py-2"
+  }, "Status"), React.createElement("th", {
+    className: "px-3 py-2"
+  }, "Confidence"), React.createElement("th", {
+    className: "px-3 py-2"
+  }, "Note"))), React.createElement("tbody", null, snap.items.map((it, i) => {
+    const m = statusMeta(it.status);
+    return React.createElement("tr", {
+      key: i,
+      className: "border-b border-white/[0.04] hover:bg-white/[0.02]"
+    }, React.createElement("td", {
+      className: "px-3 py-2.5 font-semibold"
+    }, it.name), React.createElement("td", {
+      className: "px-3 py-2.5 num ink-2"
+    }, it.q), React.createElement("td", {
+      className: `px-3 py-2.5 num text-right font-semibold ${it.cost === 0 ? 'ink-3' : ''}`
+    }, it.cost === 0 ? '—' : formatCurrency(it.cost)), React.createElement("td", {
+      className: "px-3 py-2.5"
+    }, React.createElement("span", {
+      className: `text-[10px] tracking-wider font-bold px-2 py-0.5 rounded border ${m.bg} ${m.color}`
+    }, m.label)), React.createElement("td", {
+      className: "px-3 py-2.5"
+    }, typeof it.confidence === 'number' ? React.createElement(ConfidenceMeter, {
+      value: it.confidence
+    }) : React.createElement("span", {
+      className: "ink-3 text-[11px]"
+    }, "n/a")), React.createElement("td", {
+      className: "px-3 py-2.5 text-[11px] ink-2 font-serif italic max-w-md"
+    }, it.note));
+  })))))), React.createElement(Panel, {
+    title: "Plan Evolution \xB7 Firm vs Conditional Across Snapshots",
+    subtitle: "The annual snapshot was correct in October. The contamination event broke it. Copperleaf adapted across four reoptimizations.",
+    accent: "emerald",
+    className: "mb-5"
+  }, React.createElement("div", {
+    className: "p-5"
+  }, React.createElement(SnapshotComparisonChart, null), React.createElement("div", {
+    className: "mt-4 pt-4 border-t divider grid grid-cols-1 md:grid-cols-4 gap-3 text-[11px]"
+  }, React.createElement("div", null, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold mb-0.5"
+  }, "SNAPSHOT 0 \u2192 1"), React.createElement("div", {
+    className: "ink-2 font-serif italic"
+  }, "Contamination diagnosed. Emergency capital added. Original plan preserved where still valid.")), React.createElement("div", null, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold mb-0.5"
+  }, "SNAPSHOT 1 \u2192 2"), React.createElement("div", {
+    className: "ink-2 font-serif italic"
+  }, "3 Tier 2 modules recovered. ", React.createElement("b", {
+    className: "not-italic font-sans text-emerald-400"
+  }, "\u20AC450K released"), ". Capital flexibility preserved.")), React.createElement("div", null, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold mb-0.5"
+  }, "SNAPSHOT 2 \u2192 3"), React.createElement("div", {
+    className: "ink-2 font-serif italic"
+  }, "2 more Tier 2 recovered (M8, M9). Q3 outage commissioned. Transformer reinstated.")), React.createElement("div", null, React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold mb-0.5"
+  }, "CUMULATIVE"), React.createElement("div", {
+    className: "ink-2 font-serif italic"
+  }, "Conditional budgeting saved ", React.createElement("b", {
+    className: "not-italic font-sans text-emerald-400"
+  }, "\u20AC900K"), " vs committing all Tier 2 work upfront."))))), React.createElement("div", {
+    className: "grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5"
+  }, React.createElement(Panel, {
+    title: "Capital-Protected Item \xB7 Lesson Learned",
+    accent: "amber"
+  }, React.createElement("div", {
+    className: "p-5"
+  }, React.createElement("div", {
+    className: "text-[11px] ink-2 leading-relaxed font-serif italic mb-3"
+  }, "Resolve Predict identified that ", React.createElement("b", {
+    className: "not-italic font-sans text-red-300"
+  }, "\u20AC2.8M in Tier 1 replacements"), " \u2014 and potentially \u20AC1.35M more in Tier 2 refurbishments \u2014 were caused by a ", React.createElement("b", {
+    className: "not-italic font-sans text-amber-300"
+  }, "\u20AC50K resin replacement deferred for 3 months"), "."), React.createElement("div", {
+    className: "text-[12px] ink-2 leading-relaxed mb-3"
+  }, "This insight is now encoded in Copperleaf's optimization logic: the resin replacement is classified as a ", React.createElement("span", {
+    className: "text-amber-300 font-semibold"
+  }, "capital-protected item"), ". Any future deferral requires an automatic downstream impact assessment showing the estimated fleet-wide damage and cost consequence."), React.createElement("div", {
+    className: "panel-2 rounded p-3 border-l-2 border-amber-500",
+    style: {
+      background: 'rgba(217,167,65,0.04)'
+    }
+  }, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-amber-300 font-bold mb-1"
+  }, "The 22:1 ratio is institutional knowledge"), React.createElement("div", {
+    className: "text-[11.5px] ink-2"
+  }, "Not tribal knowledge. The system learned. The risk is structural now.")))), React.createElement(Panel, {
+    title: "From Annual to Living",
+    accent: "emerald"
+  }, React.createElement("div", {
+    className: "p-5"
+  }, React.createElement("div", {
+    className: "text-[12px] ink-2 leading-relaxed mb-3"
+  }, "Copperleaf is no longer a tool the asset management team uses once a year. It is a ", React.createElement("b", {
+    className: "text-emerald-400"
+  }, "continuously optimizing engine"), " that receives real-time condition data from AVEVA CONNECT, context-aware predictions with confidence scores from Resolve Predict, and produces a capital plan that adapts to reality."), React.createElement("div", {
+    className: "text-[12px] ink-2 font-serif italic leading-relaxed"
+  }, "The plan that was right in January was wrong by March. The old world would have executed the January plan regardless. ", React.createElement("span", {
+    className: "not-italic font-sans text-emerald-400 font-semibold"
+  }, "The new world adapted: three modules recovered, \u20AC450K was released, and the capital plan rebalanced automatically.")), React.createElement("div", {
+    className: "grid grid-cols-3 gap-2 mt-4 pt-4 border-t divider"
+  }, React.createElement("div", {
+    className: "text-center"
+  }, React.createElement("div", {
+    className: "num text-xl font-bold text-emerald-400"
+  }, "4\xD7"), React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold"
+  }, "replans / year")), React.createElement("div", {
+    className: "text-center"
+  }, React.createElement("div", {
+    className: "num text-xl font-bold text-emerald-400"
+  }, "\u20AC900K"), React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold"
+  }, "released cumulative")), React.createElement("div", {
+    className: "text-center"
+  }, React.createElement("div", {
+    className: "num text-xl font-bold text-emerald-400"
+  }, "97%"), React.createElement("div", {
+    className: "text-[10px] uppercase tracking-wider ink-3 font-semibold"
+  }, "production target")))))), React.createElement(Panel, {
+    title: "The Value Story \xB7 Operational, Financial, Strategic",
+    accent: "emerald",
+    className: "mb-5"
+  }, React.createElement("div", {
+    className: "p-5 grid grid-cols-1 lg:grid-cols-3 gap-4"
+  }, React.createElement("div", null, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-emerald-400 font-bold mb-2"
+  }, "OPERATIONAL"), React.createElement("ul", {
+    className: "text-[11.5px] ink-2 space-y-1.5 list-disc list-outside ml-4 leading-relaxed"
+  }, React.createElement("li", null, "Fleet-wide contamination root-caused before any module reached catastrophic failure"), React.createElement("li", null, "Production availability recovered from 92% to ", React.createElement("b", {
+    className: "text-ink"
+  }, "97%")), React.createElement("li", null, "PSO-optimized outage completed in ", React.createElement("b", {
+    className: "text-ink"
+  }, "6 days vs 14")), React.createElement("li", null, "Off-taker delivery commitments met without penalty"))), React.createElement("div", null, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-emerald-400 font-bold mb-2"
+  }, "FINANCIAL"), React.createElement("ul", {
+    className: "text-[11.5px] ink-2 space-y-1.5 list-disc list-outside ml-4 leading-relaxed"
+  }, React.createElement("li", null, "Water upgrade (\u20AC200K) prevented up to \u20AC4.5M in fleet damage \u2014 ", React.createElement("b", {
+    className: "text-ink"
+  }, "22:1 return")), React.createElement("li", null, "Conditional budgeting preserved ", React.createElement("b", {
+    className: "text-ink"
+  }, "\u20AC1.35M"), " in capital flexibility"), React.createElement("li", null, "3 modules recovered without intervention \u2014 ", React.createElement("b", {
+    className: "text-ink"
+  }, "\u20AC450K released")), React.createElement("li", null, "Module 12 refurb deferred based on actual data \u2014 \u20AC450K preserved in Y2"))), React.createElement("div", null, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-wider text-emerald-400 font-bold mb-2"
+  }, "STRATEGIC"), React.createElement("ul", {
+    className: "text-[11.5px] ink-2 space-y-1.5 list-disc list-outside ml-4 leading-relaxed"
+  }, React.createElement("li", null, "Capital plan built on ", React.createElement("b", {
+    className: "text-ink"
+  }, "real fleet condition data"), ", not OEM assumptions"), React.createElement("li", null, "Plan adapts continuously as conditions change"), React.createElement("li", null, "Every euro auditable from sensor data \u2192 AI prediction \u2192 optimization \u2192 execution"), React.createElement("li", null, "System learns: deferred maintenance permanently flagged as capital-protected"))))), React.createElement("div", {
+    className: "panel rounded-md p-6",
+    style: {
+      background: 'linear-gradient(135deg, rgba(79,188,230,0.04) 0%, rgba(217,167,65,0.04) 33%, rgba(232,101,74,0.04) 66%, rgba(95,203,140,0.04) 100%)',
+      borderTop: '1px solid var(--line-2)'
+    }
+  }, React.createElement("div", {
+    className: "max-w-4xl mx-auto text-center"
+  }, React.createElement("div", {
+    className: "text-[10.5px] uppercase tracking-[0.2em] ink-3 font-bold mb-3"
+  }, "THE COMPLETE LIFECYCLE IN ONE SENTENCE"), React.createElement("div", {
+    className: "text-[15px] leading-relaxed font-serif italic text-ink-2"
+  }, React.createElement("span", {
+    className: "text-cyan-300 font-sans not-italic font-semibold"
+  }, "AVEVA CONNECT"), " monitors. ", React.createElement("span", {
+    className: "text-amber-300 font-sans not-italic font-semibold"
+  }, "Resolve Predict"), " reasons and scores its confidence. Emergency actions go straight to ", React.createElement("span", {
+    className: "text-orange-300 font-sans not-italic font-semibold"
+  }, "IFS Cloud"), ". Capital investments go through ", React.createElement("span", {
+    className: "text-emerald-400 font-sans not-italic font-semibold"
+  }, "Copperleaf"), ". Copperleaf optimizes continuously. AVEVA Engineering designs. IFS Cloud PPM executes projects. IFS Cloud EAM manages work. PSO assigns crews. And every outcome feeds back into the next decision."), React.createElement("div", {
+    className: "mt-5 flex items-center justify-center gap-2 text-[10.5px] ink-3 tracking-[0.16em] uppercase"
+  }, React.createElement("span", null, "IFS"), " ", React.createElement("span", {
+    className: "ink-4"
+  }, "+"), " ", React.createElement("span", null, "AVEVA"), " ", React.createElement("span", {
+    className: "ink-4"
+  }, "\xB7"), " ", React.createElement("span", null, "Confidential")))));
+};
+const App = () => {
+  const [system, setSystem] = useState('aveva');
+  const [pendingLane, setPendingLane] = useState(null);
+  const [theme, setTheme] = useState(() => {
+    try {
+      return localStorage.getItem('h2demo-theme') || 'dark';
+    } catch (e) {
+      return 'dark';
+    }
+  });
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, [system]);
+  useEffect(() => {
+    document.body.classList.toggle('light', theme === 'light');
+    try {
+      localStorage.setItem('h2demo-theme', theme);
+    } catch (e) {}
+  }, [theme]);
+  const onJumpToLane = target => {
+    setPendingLane(target);
+    setSystem(target);
+  };
+  const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
+  return React.createElement("div", {
+    className: "min-h-screen"
+  }, React.createElement(TopBar, {
+    system: system,
+    onSystem: setSystem,
+    theme: theme,
+    onToggleTheme: toggleTheme
+  }), React.createElement(StoryArc, {
+    system: system
+  }), system === 'aveva' && React.createElement(AvevaConnectView, {
+    onTransition: setSystem
+  }), system === 'resolve' && React.createElement(ResolvePredictView, {
+    onTransition: setSystem,
+    onJumpToLane: onJumpToLane
+  }), system === 'ifs' && React.createElement(IfsCloudView, {
+    onTransition: setSystem
+  }), system === 'copperleaf' && React.createElement(CopperleafView, {
+    onTransition: setSystem
+  }), React.createElement("div", {
+    className: "border-t divider mt-4"
+  }, React.createElement("div", {
+    className: "max-w-[1680px] mx-auto px-6 py-4 flex items-center justify-between flex-wrap gap-3"
+  }, React.createElement("div", {
+    className: "text-[10.5px] ink-3 font-serif italic"
+  }, "Demo prototype \xB7 synthetic data \xB7 for IFS + AVEVA storyboard illustration only."), React.createElement("div", {
+    className: "flex items-center gap-4 text-[10.5px] ink-3 tracking-wider uppercase label-mono"
+  }, React.createElement("span", null, "AVEVA CONNECT"), React.createElement("span", {
+    className: "ink-4"
+  }, "\xB7"), React.createElement("span", null, "Resolve Predict"), React.createElement("span", {
+    className: "ink-4"
+  }, "\xB7"), React.createElement("span", null, "IFS Cloud"), React.createElement("span", {
+    className: "ink-4"
+  }, "\xB7"), React.createElement("span", null, "Copperleaf")))));
+};
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App, null));
+</script>
+</body>
+</html>
