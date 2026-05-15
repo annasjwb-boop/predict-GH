@@ -1468,7 +1468,8 @@ const SYSTEMS = [{
   label: 'AVEVA CONNECT',
   subtitle: 'Monitor',
   color: 'cyan',
-  role: 'See the pattern'
+  role: 'See the pattern',
+  hidden: true
 }, {
   id: 'resolve',
   label: 'Resolve Predict',
@@ -1480,14 +1481,17 @@ const SYSTEMS = [{
   label: 'IFS Cloud',
   subtitle: 'Execute',
   color: 'coral',
-  role: 'Dispatch and complete'
+  role: 'Dispatch and complete',
+  hidden: true
 }, {
   id: 'copperleaf',
   label: 'Copperleaf',
   subtitle: 'Optimize',
   color: 'emerald',
-  role: 'Reoptimize the plan'
+  role: 'Reoptimize the plan',
+  hidden: true
 }];
+const VISIBLE_SYSTEMS = SYSTEMS.filter(s => !s.hidden);
 const TopBar = ({
   system,
   onSystem,
@@ -1556,7 +1560,7 @@ const TopBar = ({
     className: "text-[10.5px] ink-2 tracking-wide label-mono"
   }, "UNIFIED PLATFORM \xB7 LIVE"))), React.createElement("div", {
     className: "flex items-center gap-1"
-  }, SYSTEMS.map((s, i) => {
+  }, VISIBLE_SYSTEMS.map((s, i) => {
     const c = colorMap[s.color];
     const active = system === s.id;
     return React.createElement(Fragment, {
@@ -1571,7 +1575,7 @@ const TopBar = ({
       className: `text-[12px] font-semibold tracking-tight ${active ? c.active : 'text-ink'}`
     }, s.label), React.createElement("div", {
       className: `text-[9.5px] uppercase tracking-wider ${active ? 'ink-2' : 'ink-3'}`
-    }, s.subtitle)), i < SYSTEMS.length - 1 && React.createElement("div", {
+    }, s.subtitle)), i < VISIBLE_SYSTEMS.length - 1 && React.createElement("div", {
       className: "text-ink-4 text-xs px-0.5"
     }, "\u2192"));
   })), React.createElement("div", {
@@ -1618,6 +1622,7 @@ const TopBar = ({
 const StoryArc = ({
   system
 }) => {
+  if (VISIBLE_SYSTEMS.length <= 1) return null;
   const stages = [{
     id: 'aveva',
     label: 'Detect',
@@ -3057,7 +3062,7 @@ const ActionsTab = ({
     className: "text-[11.5px] ink-2 font-serif italic leading-relaxed"
   }, React.createElement("span", {
     className: "not-italic font-sans text-amber-300 font-semibold tracking-wide"
-  }, "The routing logic is visible in the table."), " High-confidence emergency items skip the capital queue. High-confidence capital items go through Copperleaf for optimization. Lower-confidence items wait for data \u2014 Copperleaf holds the budget but creates no work orders until the confidence rises."))), React.createElement("div", {
+  }, "The routing logic is visible in the table."), " High-confidence emergency items skip the capital queue. High-confidence capital items go through Copperleaf for optimization. Lower-confidence items wait for data \u2014 Copperleaf holds the budget but creates no work orders until the confidence rises."))), (VISIBLE_SYSTEMS.some(s => s.id === 'ifs') || VISIBLE_SYSTEMS.some(s => s.id === 'copperleaf')) && React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-3 gap-3"
   }, React.createElement("button", {
     onClick: () => onJumpToLane('ifs'),
@@ -4355,7 +4360,7 @@ const CopperleafView = ({
   }, "\xB7"), " ", React.createElement("span", null, "Confidential")))));
 };
 const App = () => {
-  const [system, setSystem] = useState('aveva');
+  const [system, setSystem] = useState(VISIBLE_SYSTEMS[0]?.id || 'resolve');
   const [pendingLane, setPendingLane] = useState(null);
   const [theme, setTheme] = useState(() => {
     try {
